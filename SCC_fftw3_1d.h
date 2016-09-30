@@ -148,6 +148,20 @@ fftw3_1d(long nx, double LX = 1.0)
 	initialize(nx,LX);
 }
 
+fftw3_1d(const fftw3_1d& DFT)
+{
+	if(DFT.forwardplan == 0)
+	{
+		in  = 0;
+        out = 0;
+	    forwardplan = 0;
+	    inverseplan = 0;
+		initialize();
+		return;
+	}
+
+     initialize(DFT.nx,DFT.LX);
+}
 
 virtual ~fftw3_1d()
 {

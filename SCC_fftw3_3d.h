@@ -169,6 +169,24 @@ fftw3_3d()
 
 }
 
+fftw3_3d(const fftw3_3d& DFT)
+{
+	if(DFT.forwardplan == 0)
+	{
+		in  = 0;
+        out = 0;
+	    forwardplan = 0;
+	    inverseplan = 0;
+		initialize();
+		return;
+	}l
+
+#ifdef _FFTW_OPENMP
+     fftw_init_threads();
+#endif
+     initialize(DFT.nx,DFT.ny,DFT.nz,DFT.LX,DFT.LY,DFT.LZ);
+}
+
 fftw3_3d(long nx, long ny, long nz, double LX = 1.0, double LY = 1.0, double LZ = 1.0)
 {
     this->nx    = nx;
