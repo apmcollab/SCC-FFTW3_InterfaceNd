@@ -179,7 +179,7 @@ fftw3_3d(const fftw3_3d& DFT)
 	    inverseplan = 0;
 		initialize();
 		return;
-	}l
+	}
 
 #ifdef _FFTW_OPENMP
      fftw_init_threads();
