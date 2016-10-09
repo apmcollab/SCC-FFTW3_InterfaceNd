@@ -150,6 +150,7 @@ virtual ~fftw3_cos1d()
     if(plan != 0) fftw_destroy_plan(plan);
     if(in  != 0)  fftw_free(in);
     if(out != 0)  fftw_free(out);
+
     plan = 0;
     in   = 0;
     out  = 0;

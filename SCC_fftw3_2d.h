@@ -198,9 +198,9 @@ virtual ~fftw3_2d()
     if(in  != 0) fftw_free(in); 
     if(out != 0) fftw_free(out);
 
-#ifdef _FFTW_OPENMP
+    #ifdef _FFTW_OPENMP
     fftw_cleanup_threads();
-#endif
+    #endif
 }
 
 #ifdef _FFTW_OPENMP

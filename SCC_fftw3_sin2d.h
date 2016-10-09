@@ -170,6 +170,7 @@ virtual ~fftw3_sin2d()
 
     if(in  != 0) fftw_free(in);
     if(out != 0) fftw_free(out);
+
 }
 
 void initialize()
@@ -178,6 +179,7 @@ void initialize()
 
     if(in  != 0) fftw_free(in);
     if(out != 0) fftw_free(out);
+
 
  	plan = 0;
 
