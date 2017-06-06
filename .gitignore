@@ -2,3 +2,6 @@
 .hgignore
 .hgsub
 .settings
+.cproject
+.project
+
