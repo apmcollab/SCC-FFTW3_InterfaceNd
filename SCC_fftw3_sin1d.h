@@ -183,7 +183,7 @@ void fftw1d_sin_forward(GridFunction1d&  inF,  DoubleVector1d& outF)
 
 	if(nx != inF.getXpanelCount())
     {
-    initialize(inF.getXpanelCount());
+    initialize(inF.getXpanelCount(),LX);
     }
 
 	// copy input ignoring perimeter values
@@ -218,7 +218,7 @@ void fftw1d_sin_inverse(DoubleVector1d&  inF,  GridFunction1d& outF)
 
 	if(nx != inF.getSize()+1)
     {
-    initialize(inF.getSize()+1);
+    initialize(inF.getSize()+1,LX);
     }
 
 	//copy input

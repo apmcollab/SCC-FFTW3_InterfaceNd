@@ -239,7 +239,7 @@ void fftw2d_sin_forward(GridFunction2d& inF, DoubleVector2d& outF)
 
 	if((nx != inF.getXpanelCount()) || (ny != inF.getYpanelCount()))
     {
-    initialize(inF.getXpanelCount(),inF.getYpanelCount());
+    initialize(inF.getXpanelCount(),inF.getYpanelCount(),LX,LY);
     }
 
 	// Extract input, ignoring perimeter data
@@ -280,7 +280,7 @@ void fftw2d_sin_inverse(DoubleVector2d& inF, GridFunction2d& outF)
 
 	if((nx != inF.getIndex1Size()+1) || (ny != inF.getIndex2Size()+1))
     {
-    initialize(inF.getIndex1Size()+1,inF.getIndex2Size()+1);
+    initialize(inF.getIndex1Size()+1,inF.getIndex2Size()+1,LX,LY);
     }
 
 	for(i=0; i < nSampleX; i++)

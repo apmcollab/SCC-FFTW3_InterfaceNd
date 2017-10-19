@@ -373,7 +373,7 @@ DoubleVector2d& outReal, DoubleVector2d& outImag)
     || (ny != inReal.getYpanelCount()))
     {
     initialize(inReal.getXpanelCount(),
-               inReal.getYpanelCount());
+               inReal.getYpanelCount(),LX,LY);
     }
 
 	// Capture and re-order input. This extraction
@@ -424,7 +424,7 @@ GridFunction2d& outReal, GridFunction2d& outImag)
     || (ny != inReal.getIndex2Size()))
     {
     initialize(inReal.getIndex1Size(),
-               inReal.getIndex2Size());
+               inReal.getIndex2Size(),LX,LY);
     }
 
 	//reorder input

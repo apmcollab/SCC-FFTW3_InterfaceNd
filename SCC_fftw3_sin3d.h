@@ -281,7 +281,7 @@ void fftw3d_sin_forward(GridFunction3d& inF, DoubleVector3d& outF)
 
 	if((nx != inF.getXpanelCount()) || (ny != inF.getYpanelCount())|| (nz != inF.getZpanelCount()))
     {
-    initialize(inF.getXpanelCount(),inF.getYpanelCount(),inF.getZpanelCount());
+    initialize(inF.getXpanelCount(),inF.getYpanelCount(),inF.getZpanelCount(),LX,LY,LZ);
     }
 
 	for(i=0; i < nSampleX; i++)
@@ -324,7 +324,7 @@ void fftw3d_sin_inverse(DoubleVector3d& inF, GridFunction3d& outF)
 
 	if((nx != inF.getIndex1Size()+1) || (ny != inF.getIndex2Size()+1)|| (nz != inF.getIndex3Size()+1))
     {
-    initialize(inF.getIndex1Size()+1,inF.getIndex2Size()+1,inF.getIndex3Size()+1);
+    initialize(inF.getIndex1Size()+1,inF.getIndex2Size()+1,inF.getIndex3Size()+1,LX,LY,LZ);
     }
 
 	for(i=0; i < nSampleX; i++)

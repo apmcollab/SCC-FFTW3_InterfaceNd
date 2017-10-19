@@ -256,8 +256,8 @@ void fftw1d_forward(DoubleVector1d&  inReal,  DoubleVector1d& inImag,
 //
 
 
-void fftw1d_inverse    (DoubleVector1d&  inReal,  DoubleVector1d& inImag,
-						DoubleVector1d& outReal,  DoubleVector1d& outImag)
+void fftw1d_inverse (DoubleVector1d&  inReal,  DoubleVector1d& inImag,
+				     DoubleVector1d& outReal,  DoubleVector1d& outImag)
 {
 	if(nx != inReal.getSize())
     {
@@ -307,7 +307,7 @@ void fftw1d_forward(GridFunction1d&  inReal,  GridFunction1d& inImag,
 
 	if(nx != inReal.getXpanelCount())
     {
-    initialize(inReal.getXpanelCount());
+    initialize(inReal.getXpanelCount(),LX);
     }
 
 	//copy input
@@ -344,7 +344,7 @@ void fftw1d_inverse(DoubleVector1d&  inReal,  DoubleVector1d& inImag,
 
 	if(nx != inReal.getSize())
     { 
-    initialize(inReal.getSize());
+    initialize(inReal.getSize(),LX);
     }
 
 	long i; long k; 

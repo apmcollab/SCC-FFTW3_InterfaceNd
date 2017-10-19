@@ -307,7 +307,7 @@ DoubleVector3d& outReal, DoubleVector3d& outImag)
     {
     initialize(inReal.getXpanelCount(),
                inReal.getYpanelCount(),
-               inReal.getZpanelCount());
+               inReal.getZpanelCount(),LX,LY,LZ);
     }
 
 	// Capture and re-order input. This extraction
@@ -375,7 +375,7 @@ GridFunction3d& outReal, GridFunction3d& outImag)
     {
     initialize( inReal.getIndex1Size(),
                 inReal.getIndex2Size(),
-                inReal.getIndex3Size());
+                inReal.getIndex3Size(),LX,LY,LZ);
     }
 
 	for(i=0; i < nx; i++)
