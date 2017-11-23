@@ -97,7 +97,7 @@
 /*
 #############################################################################
 #
-# Copyright 2014-2015 Chris Anderson
+# Copyright 2014-2017 Chris Anderson
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the Lesser GNU General Public License as published by
@@ -150,6 +150,7 @@ virtual ~fftw3_cos1d()
     if(plan != 0) fftw_destroy_plan(plan);
     if(in  != 0)  fftw_free(in);
     if(out != 0)  fftw_free(out);
+
     plan = 0;
     in   = 0;
     out  = 0;

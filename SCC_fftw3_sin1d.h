@@ -71,7 +71,7 @@
 /*
 #############################################################################
 #
-# Copyright 2013-2015 Chris Anderson
+# Copyright 2013-2017 Chris Anderson
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the Lesser GNU General Public License as published by
@@ -123,6 +123,7 @@ fftw3_sin1d(long nx, double LX = 1.0)
     if(plan != 0) fftw_destroy_plan(plan);
     if(in  != 0)  fftw_free(in);
     if(out != 0)  fftw_free(out);
+
     plan = 0;
     in   = 0;
     out  = 0;
@@ -182,7 +183,7 @@ void fftw1d_sin_forward(GridFunction1d&  inF,  DoubleVector1d& outF)
 
 	if(nx != inF.getXpanelCount())
     {
-    initialize(inF.getXpanelCount());
+    initialize(inF.getXpanelCount(),LX);
     }
 
 	// copy input ignoring perimeter values
@@ -217,7 +218,7 @@ void fftw1d_sin_inverse(DoubleVector1d&  inF,  GridFunction1d& outF)
 
 	if(nx != inF.getSize()+1)
     {
-    initialize(inF.getSize()+1);
+    initialize(inF.getSize()+1,LX);
     }
 
 	//copy input

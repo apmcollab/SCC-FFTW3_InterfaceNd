@@ -103,7 +103,7 @@ namespace SCC
 /*
 #############################################################################
 #
-# Copyright 2014-2015 Chris Anderson
+# Copyright 2014-2017 Chris Anderson
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the Lesser GNU General Public License as published by
@@ -148,6 +148,20 @@ fftw3_1d(long nx, double LX = 1.0)
 	initialize(nx,LX);
 }
 
+fftw3_1d(const fftw3_1d& DFT)
+{
+	if(DFT.forwardplan == 0)
+	{
+		in  = 0;
+        out = 0;
+	    forwardplan = 0;
+	    inverseplan = 0;
+		initialize();
+		return;
+	}
+
+     initialize(DFT.nx,DFT.LX);
+}
 
 virtual ~fftw3_1d()
 {
@@ -242,8 +256,8 @@ void fftw1d_forward(DoubleVector1d&  inReal,  DoubleVector1d& inImag,
 //
 
 
-void fftw1d_inverse    (DoubleVector1d&  inReal,  DoubleVector1d& inImag,
-						DoubleVector1d& outReal,  DoubleVector1d& outImag)
+void fftw1d_inverse (DoubleVector1d&  inReal,  DoubleVector1d& inImag,
+				     DoubleVector1d& outReal,  DoubleVector1d& outImag)
 {
 	if(nx != inReal.getSize())
     {
@@ -293,7 +307,7 @@ void fftw1d_forward(GridFunction1d&  inReal,  GridFunction1d& inImag,
 
 	if(nx != inReal.getXpanelCount())
     {
-    initialize(inReal.getXpanelCount());
+    initialize(inReal.getXpanelCount(),LX);
     }
 
 	//copy input
@@ -330,7 +344,7 @@ void fftw1d_inverse(DoubleVector1d&  inReal,  DoubleVector1d& inImag,
 
 	if(nx != inReal.getSize())
     { 
-    initialize(inReal.getSize());
+    initialize(inReal.getSize(),LX);
     }
 
 	long i; long k; 

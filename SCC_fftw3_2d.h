@@ -107,7 +107,7 @@
 /*
 #############################################################################
 #
-# Copyright 2014-2015 Chris Anderson
+# Copyright 2014-2017 Chris Anderson
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the Lesser GNU General Public License as published by
@@ -153,6 +153,24 @@ fftw3_2d()
 #endif
 }
 
+fftw3_2d(const fftw3_2d& DFT)
+{
+	if(DFT.forwardplan == 0)
+	{
+		in  = 0;
+        out = 0;
+	    forwardplan = 0;
+	    inverseplan = 0;
+		initialize();
+		return;
+	}
+
+#ifdef _FFTW_OPENMP
+     fftw_init_threads();
+#endif
+     initialize(DFT.nx,DFT.ny,DFT.LX,DFT.LY);
+}
+
 fftw3_2d(long nx, long ny, double LX = 1.0, double LY = 1.0)
 {
     this->nx    = nx;
@@ -180,9 +198,9 @@ virtual ~fftw3_2d()
     if(in  != 0) fftw_free(in); 
     if(out != 0) fftw_free(out);
 
-#ifdef _FFTW_OPENMP
+    #ifdef _FFTW_OPENMP
     fftw_cleanup_threads();
-#endif
+    #endif
 }
 
 #ifdef _FFTW_OPENMP
@@ -355,7 +373,7 @@ DoubleVector2d& outReal, DoubleVector2d& outImag)
     || (ny != inReal.getYpanelCount()))
     {
     initialize(inReal.getXpanelCount(),
-               inReal.getYpanelCount());
+               inReal.getYpanelCount(),LX,LY);
     }
 
 	// Capture and re-order input. This extraction
@@ -406,7 +424,7 @@ GridFunction2d& outReal, GridFunction2d& outImag)
     || (ny != inReal.getIndex2Size()))
     {
     initialize(inReal.getIndex1Size(),
-               inReal.getIndex2Size());
+               inReal.getIndex2Size(),LX,LY);
     }
 
 	//reorder input

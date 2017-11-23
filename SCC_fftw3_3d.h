@@ -120,7 +120,7 @@
 /*
 #############################################################################
 #
-# Copyright 2014-2015 Chris Anderson
+# Copyright 2014-2017 Chris Anderson
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the Lesser GNU General Public License as published by
@@ -167,6 +167,24 @@ fftw3_3d()
      fftw_init_threads();
 #endif
 
+}
+
+fftw3_3d(const fftw3_3d& DFT)
+{
+	if(DFT.forwardplan == 0)
+	{
+		in  = 0;
+        out = 0;
+	    forwardplan = 0;
+	    inverseplan = 0;
+		initialize();
+		return;
+	}
+
+#ifdef _FFTW_OPENMP
+     fftw_init_threads();
+#endif
+     initialize(DFT.nx,DFT.ny,DFT.nz,DFT.LX,DFT.LY,DFT.LZ);
 }
 
 fftw3_3d(long nx, long ny, long nz, double LX = 1.0, double LY = 1.0, double LZ = 1.0)
@@ -289,7 +307,7 @@ DoubleVector3d& outReal, DoubleVector3d& outImag)
     {
     initialize(inReal.getXpanelCount(),
                inReal.getYpanelCount(),
-               inReal.getZpanelCount());
+               inReal.getZpanelCount(),LX,LY,LZ);
     }
 
 	// Capture and re-order input. This extraction
@@ -357,7 +375,7 @@ GridFunction3d& outReal, GridFunction3d& outImag)
     {
     initialize( inReal.getIndex1Size(),
                 inReal.getIndex2Size(),
-                inReal.getIndex3Size());
+                inReal.getIndex3Size(),LX,LY,LZ);
     }
 
 	for(i=0; i < nx; i++)
