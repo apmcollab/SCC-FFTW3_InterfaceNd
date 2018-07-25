@@ -2,6 +2,11 @@
 .hgignore
 .hgsub
 .settings
+<<<<<<< HEAD
 .cproject
 .project
 
+=======
+.project
+.cproject
+>>>>>>> da3d4bf0a544144853da3c41ddef2f0177630d34
