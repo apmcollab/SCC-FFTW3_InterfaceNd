@@ -41,7 +41,7 @@
 #include <cstdio>
 #include <cmath>
 #include <cstdlib>
-using namespace std;
+ 
 
 #ifndef _SCC_FFT_Nvalues_
 #define _SCC_FFT_Nvalues_

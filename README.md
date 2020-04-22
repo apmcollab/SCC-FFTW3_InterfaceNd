@@ -6,7 +6,7 @@ The SCC::FFTW3_InterfaceNd classes N = 1,2,3 are classes that facilitate the use
 ### Prerequisites
 C++11, FFTW3 installed, SCC::DoubleVectorNd, SCC::GridFunctionNd
 ### Versioning
-Release : 19.12.16
+Release : 1.0.1
 ### Authors
 Chris Anderson
 ### License
