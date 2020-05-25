@@ -2,6 +2,10 @@
 #include "../DoubleVectorNd/SCC_DoubleVector2d.h"    // Array class header
 #include "../GridFunctionNd/SCC_GridFunction2d.h"    // Grid function class header
 
+#include <exception>
+
+
+
 #ifndef _SCC_fftw3_sin2d_
 #define _SCC_fftw3_sin2d_
 //
@@ -91,10 +95,10 @@
     {
     for(long ky = 1; ky <= ny-1; ky++)
     {
-    	sCoeff  = f_hat(kx-1,ky-1);  // (kx,ky)'th  sin coefficient is
-    	        *                    // the (kx-1,ky-1) entry of the transform
-    	        *
-    	        *
+        sCoeff  = f_hat(kx-1,ky-1);  // (kx,ky)'th  sin coefficient is
+                *                    // the (kx-1,ky-1) entry of the transform
+                *
+                *
     }}
 */
 /*
@@ -129,7 +133,7 @@ public:
 
 fftw3_sin2d()
 {
-	plan = 0;
+    plan = 0;
     in  = 0;
     out = 0;
 
@@ -159,14 +163,15 @@ fftw3_sin2d(long nx, long ny,double LX = 1.0, double LY = 1.0)
 
     in          = 0;
     out         = 0;
-	plan        = 0;
+    plan        = 0;
 
-	initialize(nx,ny);
+    initialize(nx,ny);
 }
 
 virtual ~fftw3_sin2d()
 {
-    if(plan != 0) fftw_destroy_plan(plan);
+    if(plan != 0) 
+    {fftw_destroy_plan(plan); fftw_cleanup();}
 
     if(in  != 0) fftw_free(in);
     if(out != 0) fftw_free(out);
@@ -175,13 +180,14 @@ virtual ~fftw3_sin2d()
 
 void initialize()
 {
-    if(plan != 0) fftw_destroy_plan(plan);
+    if(plan != 0) 
+    {fftw_destroy_plan(plan); fftw_cleanup();};
 
     if(in  != 0) fftw_free(in);
     if(out != 0) fftw_free(out);
 
 
- 	plan = 0;
+    plan = 0;
 
     in  = 0;
     out = 0;
@@ -204,7 +210,8 @@ void initialize(long nx, long ny,double LX = 1.0, double LY = 1.0)
     this->ny   = ny;
     nSampleX   = nx-1;
     nSampleY   = ny-1;
-    if(plan != 0) fftw_destroy_plan(plan);
+    if(plan != 0) 
+    {fftw_destroy_plan(plan); fftw_cleanup();}
 
     if(in  != 0) fftw_free(in);
     if(out != 0) fftw_free(out);
@@ -214,6 +221,11 @@ void initialize(long nx, long ny,double LX = 1.0, double LY = 1.0)
 
     plan = fftw_plan_r2r_2d(nSampleX,nSampleY, in, out,FFTW_RODFT00,
            FFTW_RODFT00,FFTW_ESTIMATE);
+
+    if(plan == nullptr)
+    {
+    throw std::runtime_error("\nXXX Error : required fftw_r2r_2d function not available \nXXX in FFTW library used (likely MKL) ");
+    }
 
     // Efficiency: From the documentation for RODFT00 transform, nSampleX+1 and nSampleY+1
     // should be a product of small primes ==> nx and ny should be product of small primes.
@@ -226,30 +238,30 @@ void initialize(long nx, long ny,double LX = 1.0, double LY = 1.0)
 
 // fftw2d_sin_forward argument sizes:
 //
-// DoubleVector2d: Initialized to size nx+1 by ny+1
+// DoubleVector2d: Initialized to size nx-1 by ny-1
 //
 // This operator ignores the perimeter values of the input vector.
 
 void fftw2d_sin_forward(GridFunction2d& inF, DoubleVector2d& outF)
 {
-	long i,j;
+    long i,j;
 
     this->LX = inF.getXmax() - inF.getXmin();
- 	this->LY = inF.getYmax() - inF.getYmin();
+    this->LY = inF.getYmax() - inF.getYmin();
 
-	if((nx != inF.getXpanelCount()) || (ny != inF.getYpanelCount()))
+    if((nx != inF.getXpanelCount()) || (ny != inF.getYpanelCount()))
     {
     initialize(inF.getXpanelCount(),inF.getYpanelCount(),LX,LY);
     }
 
-	// Extract input, ignoring perimeter data
+    // Extract input, ignoring perimeter data
 
-	for(i=0; i < nSampleX; i++)
-	{
-	for(j=0; j < nSampleY; j++)
-	{
-		in[j+ i*nSampleY] = inF(i+1,j+1);
-	}}
+    for(i=0; i < nSampleX; i++)
+    {
+    for(j=0; j < nSampleY; j++)
+    {
+        in[j+ i*nSampleY] = inF(i+1,j+1);
+    }}
 
     fftw_execute(plan);
 
@@ -258,50 +270,50 @@ void fftw2d_sin_forward(GridFunction2d& inF, DoubleVector2d& outF)
     double scalingfactor = sqrt(LX*LY)/(2.0*((double)(nx)*(double)(ny)));
 
     for(i=0; i < nSampleX; i++)
-	{
-	for(j=0; j < nSampleY; j++)
-	{
-		outF(i,j) = out[j+ i*nSampleY]*scalingfactor;
-	}}
+    {
+    for(j=0; j < nSampleY; j++)
+    {
+        outF(i,j) = out[j+ i*nSampleY]*scalingfactor;
+    }}
 
 }
 // fftw2d_sin_inverse argument sizes:
 //
-// DoubleVector2d: Initialized to size nx+1 by ny+1
+// DoubleVector2d: Initialized to size nx-1 by ny-1
 //
 // This operator ignores the perimeter values of the input vector.
 
 void fftw2d_sin_inverse(DoubleVector2d& inF, GridFunction2d& outF)
 {
-	long i,j;
+    long i,j;
 
-	this->LX = outF.getXmax() - outF.getXmin();
- 	this->LY = outF.getYmax() - outF.getYmin();
+    this->LX = outF.getXmax() - outF.getXmin();
+    this->LY = outF.getYmax() - outF.getYmin();
 
-	if((nx != inF.getIndex1Size()+1) || (ny != inF.getIndex2Size()+1))
+    if((nx != inF.getIndex1Size()+1) || (ny != inF.getIndex2Size()+1))
     {
     initialize(inF.getIndex1Size()+1,inF.getIndex2Size()+1,LX,LY);
     }
 
-	for(i=0; i < nSampleX; i++)
-	{
-	for(j=0; j < nSampleY; j++)
-	{
-		in[j+ i*nSampleY] = inF(i,j);
-	}}
+    for(i=0; i < nSampleX; i++)
+    {
+    for(j=0; j < nSampleY; j++)
+    {
+        in[j+ i*nSampleY] = inF(i,j);
+    }}
 
     fftw_execute(plan);
 
     double scalingfactor = 1.0/(2.0*sqrt(LX*LY));
 
     for(i=0; i < nSampleX; i++)
-	{
-	for(j=0; j < nSampleY; j++)
-	{
-		outF(i+1,j+1) = out[j+ i*nSampleY]*scalingfactor;
-	}}
+    {
+    for(j=0; j < nSampleY; j++)
+    {
+        outF(i+1,j+1) = out[j+ i*nSampleY]*scalingfactor;
+    }}
 
-	outF.setBoundaryValues(0.0);
+    outF.setBoundaryValues(0.0);
 }
 
 // fftw2d_sin_forward argument sizes:
@@ -311,19 +323,19 @@ void fftw2d_sin_inverse(DoubleVector2d& inF, GridFunction2d& outF)
 
 void fftw2d_sin_forward(DoubleVector2d& inF, DoubleVector2d& outF)
 {
-	long i,j;
+    long i,j;
 
-	if((nx != inF.getIndex1Size()+1) || (ny != inF.getIndex2Size()+1))
+    if((nx != inF.getIndex1Size()+1) || (ny != inF.getIndex2Size()+1))
     {
     initialize(inF.getIndex1Size()+1,inF.getIndex2Size()+1);
     }
 
-	for(i=0; i < nSampleX; i++)
-	{
-	for(j=0; j < nSampleY; j++)
-	{
-		in[j+ i*nSampleY] = inF(i,j);
-	}}
+    for(i=0; i < nSampleX; i++)
+    {
+    for(j=0; j < nSampleY; j++)
+    {
+        in[j+ i*nSampleY] = inF(i,j);
+    }}
 
     fftw_execute(plan);
 
@@ -332,13 +344,13 @@ void fftw2d_sin_forward(DoubleVector2d& inF, DoubleVector2d& outF)
     double scalingfactor = sqrt(LX*LY)/(2.0*((double)(nx)*(double)(ny)));
     
     for(i=0; i < nSampleX; i++)
-	{
-	for(j=0; j < nSampleY; j++)
-	{
-		outF(i,j) = out[j+ i*nSampleY]*scalingfactor;
-	}}
+    {
+    for(j=0; j < nSampleY; j++)
+    {
+        outF(i,j) = out[j+ i*nSampleY]*scalingfactor;
+    }}
 }
-	
+    
 // fftw2d_sin_inverse argument sizes:
 //
 // DoubleVector2d size nx-1 by ny-1
@@ -346,30 +358,30 @@ void fftw2d_sin_forward(DoubleVector2d& inF, DoubleVector2d& outF)
 
 void fftw2d_sin_inverse(DoubleVector2d& inF, DoubleVector2d& outF)
 {
-	long i,j;
+    long i,j;
 
-	if((nx != inF.getIndex1Size()+1) || (ny != inF.getIndex2Size()+1))
+    if((nx != inF.getIndex1Size()+1) || (ny != inF.getIndex2Size()+1))
     {
     initialize(inF.getIndex1Size()+1,inF.getIndex2Size()+1);
     }
 
-	for(i=0; i < nSampleX; i++)
-	{
-	for(j=0; j < nSampleY; j++)
-	{
-		in[j+ i*nSampleY] = inF(i,j);
-	}}
+    for(i=0; i < nSampleX; i++)
+    {
+    for(j=0; j < nSampleY; j++)
+    {
+        in[j+ i*nSampleY] = inF(i,j);
+    }}
 
     fftw_execute(plan);
 
     double scalingfactor = 1.0/(2.0*sqrt(LX*LY));
 
     for(i=0; i < nSampleX; i++)
-	{
-	for(j=0; j < nSampleY; j++)
-	{
-		outF(i,j) = out[j+ i*nSampleY]*scalingfactor;
-	}}
+    {
+    for(j=0; j < nSampleY; j++)
+    {
+        outF(i,j) = out[j+ i*nSampleY]*scalingfactor;
+    }}
 }
 
 //
@@ -381,19 +393,19 @@ void fftw2d_sin_inverse(DoubleVector2d& inF, DoubleVector2d& outF)
 //
 void fftw2d_sin_forward(DoubleVector2d& F)
 {
-	long i,j;
+    long i,j;
 
-	if((nx != F.getIndex1Size()+1) || (ny != F.getIndex2Size()+1))
+    if((nx != F.getIndex1Size()+1) || (ny != F.getIndex2Size()+1))
     {
     initialize(F.getIndex1Size()+1,F.getIndex2Size()+1);
     }
 
-	for(i=0; i < nSampleX; i++)
-	{
-	for(j=0; j < nSampleY; j++)
-	{
-		in[j+ i*nSampleY] = F(i,j);
-	}}
+    for(i=0; i < nSampleX; i++)
+    {
+    for(j=0; j < nSampleY; j++)
+    {
+        in[j+ i*nSampleY] = F(i,j);
+    }}
 
     fftw_execute(plan);
 
@@ -402,11 +414,11 @@ void fftw2d_sin_forward(DoubleVector2d& F)
     double scalingfactor = sqrt(LX*LY)/(2.0*((double)(nx)*(double)(ny)));
 
     for(i=0; i < nSampleX; i++)
-	{
-	for(j=0; j < nSampleY; j++)
-	{
-		F(i,j) = out[j+ i*nSampleY]*scalingfactor;
-	}}
+    {
+    for(j=0; j < nSampleY; j++)
+    {
+        F(i,j) = out[j+ i*nSampleY]*scalingfactor;
+    }}
 }
 
 // fftw2d_sin_inverse argument sizes:
@@ -416,30 +428,30 @@ void fftw2d_sin_forward(DoubleVector2d& F)
 
 void fftw2d_sin_inverse(DoubleVector2d&  F)
 {
-	long i,j;
+    long i,j;
 
-	if((nx != F.getIndex1Size()+1) || (ny != F.getIndex2Size()+1))
+    if((nx != F.getIndex1Size()+1) || (ny != F.getIndex2Size()+1))
     {
     initialize(F.getIndex1Size()+1,F.getIndex2Size()+1);
     }
 
-	for(i=0; i < nSampleX; i++)
-	{
-	for(j=0; j < nSampleY; j++)
-	{
-		in[j+ i*nSampleY] = F(i,j);
-	}}
+    for(i=0; i < nSampleX; i++)
+    {
+    for(j=0; j < nSampleY; j++)
+    {
+        in[j+ i*nSampleY] = F(i,j);
+    }}
 
     fftw_execute(plan);
 
     double scalingfactor = 1.0/(2.0*sqrt(LX*LY));
 
     for(i=0; i < nSampleX; i++)
-	{
-	for(j=0; j < nSampleY; j++)
-	{
-		F(i,j) = out[j+ i*nSampleY]*scalingfactor;
-	}}
+    {
+    for(j=0; j < nSampleY; j++)
+    {
+        F(i,j) = out[j+ i*nSampleY]*scalingfactor;
+    }}
 }
 
 
@@ -451,7 +463,7 @@ private:
     long nSampleX;
     long nSampleY;
 
-	fftw_plan plan;
+    fftw_plan plan;
 
     double*  in;
     double* out;

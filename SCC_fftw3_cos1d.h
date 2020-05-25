@@ -87,10 +87,10 @@
 
     for(long kx = 0; kx <= nx; kx++)
     {
-    	sCoeff  = f_hat(kx);  // (kx)'th cos coefficient is
-    	        *             // the (kx)'th entry of the transform
-    	        *
-    	        *
+        sCoeff  = f_hat(kx);  // (kx)'th cos coefficient is
+                *             // the (kx)'th entry of the transform
+                *
+                *
     }
 
 */
@@ -124,7 +124,7 @@ public:
 
 fftw3_cos1d()
 {
-	plan     = 0;
+    plan     = 0;
     in       = 0;
     out      = 0;
     nx       = 0;
@@ -140,14 +140,16 @@ fftw3_cos1d(long nx,double LX = 1.0)
 
     in          = 0;
     out         = 0;
-	plan        = 0;
-	initialize(nx);
+    plan        = 0;
+    initialize(nx);
 }
 
 
 virtual ~fftw3_cos1d()
 {
-    if(plan != 0) fftw_destroy_plan(plan);
+    if(plan != 0) 
+    {fftw_destroy_plan(plan); fftw_cleanup();}
+    
     if(in  != 0)  fftw_free(in);
     if(out != 0)  fftw_free(out);
 
@@ -158,7 +160,9 @@ virtual ~fftw3_cos1d()
 
 void initialize()
 {
-    if(plan != 0) fftw_destroy_plan(plan);
+    if(plan != 0) 
+    {fftw_destroy_plan(plan); fftw_cleanup();}
+    
     if(in   != 0) fftw_free(in);
     if(out  != 0) fftw_free(out);
 
@@ -177,14 +181,20 @@ void initialize(long nx,double LX = 1.0)
     {
     this->nx       = nx;
     this->nSamples = nx+1;
-    if(plan != 0) fftw_destroy_plan(plan);
+    if(plan != 0) 
+    {fftw_destroy_plan(plan); fftw_cleanup();}
 
     if(in  != 0) fftw_free(in); 
     if(out != 0) fftw_free(out);
 
-	in  = (double*) fftw_malloc(sizeof(double) * nSamples);
+    in  = (double*) fftw_malloc(sizeof(double) * nSamples);
     out = (double*) fftw_malloc(sizeof(double) * nSamples);
     plan = fftw_plan_r2r_1d(nSamples, in, out, FFTW_REDFT00, FFTW_ESTIMATE);
+
+    if(plan == nullptr)
+    {
+    throw std::runtime_error("\nXXX Error : required fftw_r2r_1d function not available \nXXX in FFTW library used (likely MKL) ");
+    }
     }
 
     this->LX = LX;
@@ -198,32 +208,32 @@ void initialize(long nx,double LX = 1.0)
 void fftw1d_cos_forward(DoubleVector1d&  F)
 {
     long k; 
- 	double scalingfactor;
- 	
-	if(nx != F.getSize()-1)
+     double scalingfactor;
+     
+    if(nx != F.getSize()-1)
     { 
     initialize(F.getSize()-1);
     }
     
-	//copy input
-	
-	for(k=0; k < nSamples; k++)
-	{
-		in[k] = F(k);
-	}
+    //copy input
+    
+    for(k=0; k < nSamples; k++)
+    {
+        in[k] = F(k);
+    }
 
-	
+    
     fftw_execute(plan);
     
 
     scalingfactor = sqrt(LX)/(sqrt(2.0)*((double)(nx)));
-	
-	F(0)          = 0.5*out[0]*sqrt(2.0)*scalingfactor;
-	F(nSamples-1) = 0.5*out[nSamples-1]*sqrt(2.0)*scalingfactor;
-	for(k=1; k < nSamples-1; k++)
-	{
-		F(k) = out[k]*scalingfactor;
-	}
+    
+    F(0)          = 0.5*out[0]*sqrt(2.0)*scalingfactor;
+    F(nSamples-1) = 0.5*out[nSamples-1]*sqrt(2.0)*scalingfactor;
+    for(k=1; k < nSamples-1; k++)
+    {
+        F(k) = out[k]*scalingfactor;
+    }
 }
 
 // fftw2d_cos_forward argument sizes:
@@ -234,30 +244,30 @@ void fftw1d_cos_forward(DoubleVector1d&  F)
 void fftw1d_cos_forward(DoubleVector1d&  inF,  DoubleVector1d& outF)
 {
     long k; 
- 	double scalingfactor;
+     double scalingfactor;
 
-	if(nx != inF.getSize()-1)
+    if(nx != inF.getSize()-1)
     { 
     initialize(inF.getSize()-1);
     }
     
-	//copy input
-	
-	for(k=0; k < nSamples; k++)
-	{
-		in[k] = inF(k);
-	}
+    //copy input
+    
+    for(k=0; k < nSamples; k++)
+    {
+        in[k] = inF(k);
+    }
 
     fftw_execute(plan);
     
     scalingfactor = sqrt(LX)/(sqrt(2.0)*((double)(nx)));
-	
-	outF(0)          = 0.5*out[0]*sqrt(2.0)*scalingfactor;
-	outF(nSamples-1) = 0.5*out[nSamples-1]*sqrt(2.0)*scalingfactor;
-	for(k=1; k < nSamples-1; k++)
-	{
-		outF(k) = out[k]*scalingfactor;
-	}
+    
+    outF(0)          = 0.5*out[0]*sqrt(2.0)*scalingfactor;
+    outF(nSamples-1) = 0.5*out[nSamples-1]*sqrt(2.0)*scalingfactor;
+    for(k=1; k < nSamples-1; k++)
+    {
+        outF(k) = out[k]*scalingfactor;
+    }
 
 }
 
@@ -269,30 +279,30 @@ void fftw1d_cos_forward(DoubleVector1d&  inF,  DoubleVector1d& outF)
 
 void fftw1d_cos_inverse(DoubleVector1d&  F)
 {
-	double scalingfactor;
+    double scalingfactor;
 
-	if(nx != F.getSize()-1)
+    if(nx != F.getSize()-1)
     { 
     initialize(F.getSize()-1);
     }
 
-	//copy input and scale
-	
-	scalingfactor = 1.0/sqrt(2.0*LX);
-	for(long k=0; k < nSamples; k++)
-	{
-		in[k] = F(k)*scalingfactor;
-	}
+    //copy input and scale
+    
+    scalingfactor = 1.0/sqrt(2.0*LX);
+    for(long k=0; k < nSamples; k++)
+    {
+        in[k] = F(k)*scalingfactor;
+    }
 
-	in[0]          *= sqrt(2.0);
-	in[nSamples-1] *= sqrt(2.0);
+    in[0]          *= sqrt(2.0);
+    in[nSamples-1] *= sqrt(2.0);
 
     fftw_execute(plan);
 
-	for(long k=0; k < nSamples; k++)
-	{
-	F(k) = out[k];
-	}
+    for(long k=0; k < nSamples; k++)
+    {
+    F(k) = out[k];
+    }
 }
 
 // fftw2d_cos_inverse argument sizes:
@@ -302,31 +312,31 @@ void fftw1d_cos_inverse(DoubleVector1d&  F)
 
 void fftw1d_cos_inverse(DoubleVector1d&  inF,  DoubleVector1d& outF)
 {
-	double scalingfactor;
+    double scalingfactor;
 
-	if(nx != inF.getSize()-1)
+    if(nx != inF.getSize()-1)
     { 
     initialize(inF.getSize()-1);
     }
 
-	//copy input
-	
-	scalingfactor = 1.0/sqrt(2.0*LX);
-	for(long k=0; k < nSamples; k++)
-	{
-		in[k] = inF(k)*scalingfactor;
-	}
+    //copy input
+    
+    scalingfactor = 1.0/sqrt(2.0*LX);
+    for(long k=0; k < nSamples; k++)
+    {
+        in[k] = inF(k)*scalingfactor;
+    }
 
-	in[0]          *= sqrt(2.0);
-	in[nSamples-1] *= sqrt(2.0);
+    in[0]          *= sqrt(2.0);
+    in[nSamples-1] *= sqrt(2.0);
 
 
     fftw_execute(plan);
 
-	for(long k=0; k < nSamples; k++)
-	{
-	outF(k) = out[k];
-	}
+    for(long k=0; k < nSamples; k++)
+    {
+    outF(k) = out[k];
+    }
 }
 
 private:
@@ -334,7 +344,7 @@ private:
     long nx; double LX;
     long nSamples;
 
-	fftw_plan plan;
+    fftw_plan plan;
 
     double*  in;
     double* out;

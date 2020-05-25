@@ -3,6 +3,7 @@
 #include "../DoubleVectorNd/SCC_DoubleVector1d.h"    // Array class header
 #include "../GridFunctionNd/SCC_GridFunction1d.h"    // Grid function class header
 
+
 #ifndef _SCC_fftw3_sin1d_
 #define _SCC_fftw3_sin1d_
 //
@@ -97,7 +98,7 @@ public:
 
 fftw3_sin1d()
 {
-	plan     = 0;
+    plan     = 0;
     in       = 0;
     out      = 0;
     nx       = 0;
@@ -113,14 +114,16 @@ fftw3_sin1d(long nx, double LX = 1.0)
 
     in          = 0;
     out         = 0;
-	plan        = 0;
+    plan        = 0;
 
-	initialize(nx);
+    initialize(nx);
 }
 
 ~fftw3_sin1d()
 {
-    if(plan != 0) fftw_destroy_plan(plan);
+    if(plan != 0) 
+    {fftw_destroy_plan(plan); fftw_cleanup();}
+    
     if(in  != 0)  fftw_free(in);
     if(out != 0)  fftw_free(out);
 
@@ -131,7 +134,9 @@ fftw3_sin1d(long nx, double LX = 1.0)
 
 void initialize()
 {
-    if(plan != 0) fftw_destroy_plan(plan);
+    if(plan != 0) 
+    {fftw_destroy_plan(plan); fftw_cleanup();}
+    
     if(in   != 0)  fftw_free(in);
     if(out  != 0) fftw_free(out);
 
@@ -150,14 +155,22 @@ void initialize(long nx, double LX = 1.0)
     {
     this->nx       = nx;
     this->nSamples = nx-1;
-    if(plan != 0) fftw_destroy_plan(plan);
+    
+    if(plan != 0) 
+    {fftw_destroy_plan(plan); fftw_cleanup();}
 
     if(in  != 0) fftw_free(in); 
     if(out != 0) fftw_free(out);
 
-	in  = (double*) fftw_malloc(sizeof(double) * nSamples);
+    in  = (double*) fftw_malloc(sizeof(double) * nSamples);
     out = (double*) fftw_malloc(sizeof(double) * nSamples);
     plan = fftw_plan_r2r_1d(nSamples, in, out, FFTW_RODFT00, FFTW_ESTIMATE);
+
+    if(plan == nullptr)
+    {
+    throw std::runtime_error("\nXXX Error : required fftw_r2r_1d function not available \n XXX in FFTW library used (likely MKL) ");
+    }
+
 
     // Efficiency: From the documentation for RODFT00 transform, nSampleX+1
     // should be a product of small primes ==> nx should be product of small primes.
@@ -181,26 +194,26 @@ void fftw1d_sin_forward(GridFunction1d&  inF,  DoubleVector1d& outF)
 
     this->LX = inF.getXmax() - inF.getXmin();
 
-	if(nx != inF.getXpanelCount())
+    if(nx != inF.getXpanelCount())
     {
     initialize(inF.getXpanelCount(),LX);
     }
 
-	// copy input ignoring perimeter values
+    // copy input ignoring perimeter values
 
-	for(k=0; k < nSamples; k++)
-	{
-		in[k] = inF(k+1);
-	}
+    for(k=0; k < nSamples; k++)
+    {
+        in[k] = inF(k+1);
+    }
 
     fftw_execute(plan);
 
     double scalingfactor =  sqrt(LX)/(sqrt(2.0)*((double)(nx)));
 
-	for(k=0; k < nSamples; k++)
-	{
-		outF(k) = out[k]*scalingfactor;
-	}
+    for(k=0; k < nSamples; k++)
+    {
+        outF(k) = out[k]*scalingfactor;
+    }
 
 }
 
@@ -212,36 +225,36 @@ void fftw1d_sin_forward(GridFunction1d&  inF,  DoubleVector1d& outF)
 void fftw1d_sin_inverse(DoubleVector1d&  inF,  GridFunction1d& outF)
 {
 
-	// Capture domain size
+    // Capture domain size
 
     this->LX = outF.getXmax() - outF.getXmin();
 
-	if(nx != inF.getSize()+1)
+    if(nx != inF.getSize()+1)
     {
     initialize(inF.getSize()+1,LX);
     }
 
-	//copy input
+    //copy input
 
-	for(long k=0; k < nSamples; k++)
-	{
-		in[k] = inF(k);
-	}
+    for(long k=0; k < nSamples; k++)
+    {
+        in[k] = inF(k);
+    }
 
     fftw_execute(plan);
 
-	double scalingfactor = 1.0/sqrt(2.0*LX);
+    double scalingfactor = 1.0/sqrt(2.0*LX);
 
-	//reorder AND scale output
+    //reorder AND scale output
 
-	for(long k=0; k < nSamples; k++)
-	{
-		outF(k+1) = out[k]*scalingfactor;
-	}
+    for(long k=0; k < nSamples; k++)
+    {
+        outF(k+1) = out[k]*scalingfactor;
+    }
 
     // zero perimeter values
 
-	outF.setBoundaryValues(0.0);
+    outF.setBoundaryValues(0.0);
 }
 
 // fftw1d_sin_forward argument sizes:
@@ -253,26 +266,26 @@ void fftw1d_sin_forward(DoubleVector1d&  inF,  DoubleVector1d& outF)
     long k;
     double scalingfactor;
 
-	if(nx != inF.getSize()+1)
+    if(nx != inF.getSize()+1)
     {
     initialize(inF.getSize()+1);
     }
 
-	//copy input
+    //copy input
 
-	for(k=0; k < nSamples; k++)
-	{
-		in[k] = inF(k);
-	}
+    for(k=0; k < nSamples; k++)
+    {
+        in[k] = inF(k);
+    }
 
     fftw_execute(plan);
 
     scalingfactor =  sqrt(LX)/(sqrt(2.0)*((double)(nx)));
 
-	for(k=0; k < nSamples; k++)
-	{
-		outF(k) = out[k]*scalingfactor;
-	}
+    for(k=0; k < nSamples; k++)
+    {
+        outF(k) = out[k]*scalingfactor;
+    }
 }
 
 // fftw1d_sin_inverse argument sizes:
@@ -282,31 +295,31 @@ void fftw1d_sin_forward(DoubleVector1d&  inF,  DoubleVector1d& outF)
 
 void fftw1d_sin_inverse(DoubleVector1d&  inF,  DoubleVector1d& outF)
 {
-	long k;
-	double scalingfactor;
+    long k;
+    double scalingfactor;
 
-	if(nx != inF.getSize()+1)
+    if(nx != inF.getSize()+1)
     { 
     initialize(inF.getSize()+1);
     }
 
-	//copy input
-	
-	for(k=0; k < nSamples; k++)
-	{
-		in[k] = inF(k);
-	}
+    //copy input
+    
+    for(k=0; k < nSamples; k++)
+    {
+        in[k] = inF(k);
+    }
 
     fftw_execute(plan);
-	
-	scalingfactor = 1.0/sqrt(2.0*LX);
+    
+    scalingfactor = 1.0/sqrt(2.0*LX);
 
-	//reorder AND scale output
+    //reorder AND scale output
 
-	for(k=0; k < nSamples; k++)
-	{
-		outF(k) = out[k]*scalingfactor;
-	}
+    for(k=0; k < nSamples; k++)
+    {
+        outF(k) = out[k]*scalingfactor;
+    }
 }
 
 //
@@ -318,56 +331,56 @@ void fftw1d_sin_forward(DoubleVector1d&  F)
 {
     long k;
 
-	if(nx != F.getSize()+1)
+    if(nx != F.getSize()+1)
     { 
     initialize(F.getSize()+1);
     }
 
-	//copy input
-	
-	for(k=0; k < nSamples; k++)
-	{
-		in[k] = F(k);
-	}
+    //copy input
+    
+    for(k=0; k < nSamples; k++)
+    {
+        in[k] = F(k);
+    }
 
     fftw_execute(plan);
 
     double scalingfactor = sqrt(LX)/(sqrt(2.0)*((double)(nx)));
-	
-	for(k=0; k < nSamples; k++)
-	{
-		F(k) = out[k]*scalingfactor;
-	}
+    
+    for(k=0; k < nSamples; k++)
+    {
+        F(k) = out[k]*scalingfactor;
+    }
 }
 
 // DoubleVector1d is of size nx-1
 
 void fftw1d_sin_inverse(DoubleVector1d&  F)
 {
-	long k; 
+    long k; 
 
-	if(nx != F.getSize()+1)
+    if(nx != F.getSize()+1)
     { 
     initialize(F.getSize()+1);
     }
 
-	//copy input
-	
-	for(k=0; k < nSamples; k++)
-	{
-		in[k] = F(k);
-	}
+    //copy input
+    
+    for(k=0; k < nSamples; k++)
+    {
+        in[k] = F(k);
+    }
 
     fftw_execute(plan);
-	
-	double scalingfactor = 1.0/sqrt(2.0*LX);
-	
-	//reorder AND scale output
-	
-	for(k=0; k < nSamples; k++)
-	{
-		F(k) = out[k]*scalingfactor;
-	}
+    
+    double scalingfactor = 1.0/sqrt(2.0*LX);
+    
+    //reorder AND scale output
+    
+    for(k=0; k < nSamples; k++)
+    {
+        F(k) = out[k]*scalingfactor;
+    }
 }
 
 private:
@@ -376,7 +389,7 @@ private:
 
     long nSamples;
 
-	fftw_plan plan;
+    fftw_plan plan;
 
     double*  in;
     double* out;

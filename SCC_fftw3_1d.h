@@ -18,7 +18,7 @@ namespace SCC
 //####################################################################
 /**<p>
 
-	This class provides forward and inverse transforms of one dimensional
+    This class provides forward and inverse transforms of one dimensional
     data stored in GridFunction1d instances or data stored in
     DoubleVector1d instances. Normalization and scaling is performed so that the
     transforms computed are close analogs to the mathematical transforms of
@@ -45,8 +45,8 @@ namespace SCC
     GridFunction1d instance initialized with the parameters
     (nx, xMin, xMax):
 
-	If kx is a wave number in the range from -(nx/2) to (nx-1)/2
-	(the range calculated with integer division), then two GridFunction1d
+    If kx is a wave number in the range from -(nx/2) to (nx-1)/2
+    (the range calculated with integer division), then two GridFunction1d
     instances whose values are specified by the real and imaginary parts of
     sqrt(1/LX)*exp(2*pi*I*kx*(x-xMin)/LX)
 
@@ -127,8 +127,8 @@ public:
 
 fftw3_1d()
 {
-	forwardplan = 0;
-	inverseplan = 0;
+    forwardplan = 0;
+    inverseplan = 0;
 
     in  = 0;
     out = 0;
@@ -142,31 +142,38 @@ fftw3_1d(long nx, double LX = 1.0)
 
     in          = 0;
     out         = 0;
-	forwardplan = 0;
-	inverseplan = 0;
+    forwardplan = 0;
+    inverseplan = 0;
 
-	initialize(nx,LX);
+    initialize(nx,LX);
 }
 
 fftw3_1d(const fftw3_1d& DFT)
 {
-	if(DFT.forwardplan == 0)
-	{
-		in  = 0;
+    if(DFT.forwardplan == 0)
+    {
+        in  = 0;
         out = 0;
-	    forwardplan = 0;
-	    inverseplan = 0;
-		initialize();
-		return;
-	}
+        forwardplan = 0;
+        inverseplan = 0;
+        initialize();
+        return;
+    }
 
      initialize(DFT.nx,DFT.LX);
 }
 
 virtual ~fftw3_1d()
 {
-    if(forwardplan != 0) fftw_destroy_plan(forwardplan);
-    if(inverseplan != 0) fftw_destroy_plan(inverseplan); 
+    bool cleanupFlag = false;
+    
+    if(forwardplan != 0) 
+    { fftw_destroy_plan(forwardplan); cleanupFlag = true;}
+    
+    if(inverseplan != 0) 
+    {fftw_destroy_plan(inverseplan);  cleanupFlag = true;}
+    
+    if(cleanupFlag) {fftw_cleanup();}
     
     if(in  != 0) fftw_free(in); 
     if(out != 0) fftw_free(out);
@@ -174,14 +181,21 @@ virtual ~fftw3_1d()
 
 void initialize()
 {
-    if(forwardplan != 0) fftw_destroy_plan(forwardplan);
-    if(inverseplan != 0) fftw_destroy_plan(inverseplan); 
+    bool cleanupFlag = false;
+    
+    if(forwardplan != 0) 
+    { fftw_destroy_plan(forwardplan); cleanupFlag = true;}
+    
+    if(inverseplan != 0) 
+    {fftw_destroy_plan(inverseplan);  cleanupFlag = true;}
+ 
+    if(cleanupFlag) {fftw_cleanup();}   
     
     if(in != 0)  fftw_free(in); 
     if(out != 0) fftw_free(out);
 
- 	forwardplan = 0;
-	inverseplan = 0;
+     forwardplan = 0;
+    inverseplan = 0;
 
     in  = 0;
     out = 0;
@@ -191,16 +205,25 @@ void initialize()
 
 void initialize(long nx, double LX = 1.0)
 {
+    bool cleanupFlag;
     if((this->nx != nx))
     {
     this->nx = nx;
-    if(forwardplan != 0) fftw_destroy_plan(forwardplan);
-    if(inverseplan != 0) fftw_destroy_plan(inverseplan); 
     
+    cleanupFlag = false;
+    
+    if(forwardplan != 0) 
+    { fftw_destroy_plan(forwardplan); cleanupFlag = true;}
+    
+    if(inverseplan != 0) 
+    {fftw_destroy_plan(inverseplan);  cleanupFlag = true;}
+
+    if(cleanupFlag) {fftw_cleanup();}
+        
     if(in != 0)  fftw_free(in); 
     if(out != 0) fftw_free(out);
 
-	in  = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * nx);
+    in  = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * nx);
     out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * nx);
 
     forwardplan = fftw_plan_dft_1d(nx, in, out, FFTW_FORWARD,  FFTW_ESTIMATE);
@@ -218,36 +241,36 @@ void initialize(long nx, double LX = 1.0)
 // DoubleVector1d: Initialized of size nx
 
 void fftw1d_forward(DoubleVector1d&  inReal,  DoubleVector1d& inImag,
-				    DoubleVector1d& outReal,  DoubleVector1d& outImag)
+                    DoubleVector1d& outReal,  DoubleVector1d& outImag)
 {
     long k; long i;
 
-	if(nx != inReal.getSize())
+    if(nx != inReal.getSize())
     { 
     initialize(inReal.getSize());
     }
 
-	//copy input
-	
-	for(k=0; k < nx; k++)
-	{
-		in[k][0] = inReal(k);
-		in[k][1] = inImag(k);
-	}
+    //copy input
+    
+    for(k=0; k < nx; k++)
+    {
+        in[k][0] = inReal(k);
+        in[k][1] = inImag(k);
+    }
 
     fftw_execute(forwardplan);
-	
+    
     // extract output and scale
 
     double scalefactor = sqrt(LX)/nx;
 
-	for(k=0; k < nx; k++)
-	{
-    	i =   (k + (nx/2))%nx;   //NB: uses integer division of odd numbers
+    for(k=0; k < nx; k++)
+    {
+        i =   (k + (nx/2))%nx;   //NB: uses integer division of odd numbers
 
-		outReal(i) = out[k][0]*scalefactor;
-		outImag(i) = out[k][1]*scalefactor;
-	}
+        outReal(i) = out[k][0]*scalefactor;
+        outImag(i) = out[k][1]*scalefactor;
+    }
 }
 
 // fftw1d_inverse argument sizes:
@@ -257,37 +280,37 @@ void fftw1d_forward(DoubleVector1d&  inReal,  DoubleVector1d& inImag,
 
 
 void fftw1d_inverse (DoubleVector1d&  inReal,  DoubleVector1d& inImag,
-				     DoubleVector1d& outReal,  DoubleVector1d& outImag)
+                     DoubleVector1d& outReal,  DoubleVector1d& outImag)
 {
-	if(nx != inReal.getSize())
+    if(nx != inReal.getSize())
     {
     initialize(inReal.getSize());
     }
 
-	long i; long k;
+    long i; long k;
 
-	//reorder input
+    //reorder input
 
-	for(i=0; i < nx; i++)
-	{
+    for(i=0; i < nx; i++)
+    {
         k = (i - (nx/2) + nx )%nx ;  //NB: uses integer division of odd numbers
-		in[k][0] = inReal(i);
-		in[k][1] = inImag(i);
-	}
+        in[k][0] = inReal(i);
+        in[k][1] = inImag(i);
+    }
 
-	//transform
+    //transform
 
     fftw_execute(inverseplan);
 
-	// Capture periodic data
+    // Capture periodic data
 
     double scalefactor =  1.0/sqrt(LX);
 
-	for(k=0; k < nx; k++)
-	{
-		outReal(k) = out[k][0]*scalefactor;
-		outImag(k) = out[k][1]*scalefactor;
-	}
+    for(k=0; k < nx; k++)
+    {
+        outReal(k) = out[k][0]*scalefactor;
+        outImag(k) = out[k][1]*scalefactor;
+    }
 }
 
 
@@ -297,7 +320,7 @@ void fftw1d_inverse (DoubleVector1d&  inReal,  DoubleVector1d& inImag,
 // DoubleVector1d: Initialized of size nx
 
 void fftw1d_forward(GridFunction1d&  inReal,  GridFunction1d& inImag,
-				    DoubleVector1d& outReal,  DoubleVector1d& outImag)
+                    DoubleVector1d& outReal,  DoubleVector1d& outImag)
 {
     long k; long i;
 
@@ -305,30 +328,30 @@ void fftw1d_forward(GridFunction1d&  inReal,  GridFunction1d& inImag,
 
     this->LX = inReal.getXmax() - inReal.getXmin();
 
-	if(nx != inReal.getXpanelCount())
+    if(nx != inReal.getXpanelCount())
     {
     initialize(inReal.getXpanelCount(),LX);
     }
 
-	//copy input
+    //copy input
 
-	for(k=0; k < nx; k++)
-	{
-		in[k][0] = inReal(k);
-		in[k][1] = inImag(k);
-	}
+    for(k=0; k < nx; k++)
+    {
+        in[k][0] = inReal(k);
+        in[k][1] = inImag(k);
+    }
 
     fftw_execute(forwardplan);
 
     double scalefactor =  sqrt(LX)/nx;
 
-	for(k=0; k < nx; k++)
-	{
-    	i =   (k + (nx/2))%nx;   //NB: uses integer division of odd numbers
+    for(k=0; k < nx; k++)
+    {
+        i =   (k + (nx/2))%nx;   //NB: uses integer division of odd numbers
 
-		outReal(i) = out[k][0]*scalefactor;
-		outImag(i) = out[k][1]*scalefactor;
-	}
+        outReal(i) = out[k][0]*scalefactor;
+        outImag(i) = out[k][1]*scalefactor;
+    }
 }
 
 // fftw1d_inverse argument sizes:
@@ -338,52 +361,52 @@ void fftw1d_forward(GridFunction1d&  inReal,  GridFunction1d& inImag,
 
 
 void fftw1d_inverse(DoubleVector1d&  inReal,  DoubleVector1d& inImag,
-					GridFunction1d& outReal,  GridFunction1d& outImag)
+                    GridFunction1d& outReal,  GridFunction1d& outImag)
 {
-	this->LX = outReal.getXmax() - outReal.getXmin();
+    this->LX = outReal.getXmax() - outReal.getXmin();
 
-	if(nx != inReal.getSize())
+    if(nx != inReal.getSize())
     { 
     initialize(inReal.getSize(),LX);
     }
 
-	long i; long k; 
+    long i; long k; 
 
-	//reorder input
-	
-	for(i=0; i < nx; i++)
-	{
+    //reorder input
+    
+    for(i=0; i < nx; i++)
+    {
         k = (i - (nx/2) + nx )%nx ;  //NB: uses integer division of odd numbers
-		in[k][0] = inReal(i);
-		in[k][1] = inImag(i);
-	}
+        in[k][0] = inReal(i);
+        in[k][1] = inImag(i);
+    }
 
-	//transform
+    //transform
 
     fftw_execute(inverseplan);
-	
-	// Capture periodic data
+    
+    // Capture periodic data
 
     double scalefactor =  1.0/sqrt(LX);
 
-	for(k=0; k < nx; k++)
-	{
-		outReal(k) = out[k][0]*scalefactor;
-		outImag(k) = out[k][1]*scalefactor;
-	}
+    for(k=0; k < nx; k++)
+    {
+        outReal(k) = out[k][0]*scalefactor;
+        outImag(k) = out[k][1]*scalefactor;
+    }
 
-	// Enforce periodicity of output GridFunction
+    // Enforce periodicity of output GridFunction
 
-	outReal.enforcePeriodicity();
-	outImag.enforcePeriodicity();
+    outReal.enforcePeriodicity();
+    outImag.enforcePeriodicity();
 }
 
 private:
 
     long nx; double LX;
 
-	fftw_plan forwardplan;
-	fftw_plan inverseplan;
+    fftw_plan forwardplan;
+    fftw_plan inverseplan;
 
     fftw_complex*  in;
     fftw_complex* out;

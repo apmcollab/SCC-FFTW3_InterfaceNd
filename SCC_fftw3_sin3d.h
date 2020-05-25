@@ -3,6 +3,8 @@
 #include "../DoubleVectorNd/SCC_DoubleVector3d.h"    // Array class header
 #include "../GridFunctionNd/SCC_GridFunction3d.h"    // Grid function class header
 
+#include <exception>
+
 #ifdef _FFTW_OPENMP
 #include <omp.h>
 #endif
@@ -103,10 +105,10 @@
     {
     for(long kz = 1; kz <= nz-1; kz++)
     {
-    	sCoeff  = f_hat(kx-1,ky-1,kz-1);  // (kx,ky,kz)'th  sin coefficient is
-    	        *                         // the (kx-1,ky-1,kz-1) entry of the transform
-    	        *
-    	        *
+        sCoeff  = f_hat(kx-1,ky-1,kz-1);  // (kx,ky,kz)'th  sin coefficient is
+                *                         // the (kx-1,ky-1,kz-1) entry of the transform
+                *
+                *
     }}}
 */
 /*
@@ -141,7 +143,7 @@ public:
 
 fftw3_sin3d()
 {
-	plan = 0;
+    plan = 0;
     in   = 0;
     out  = 0;
 
@@ -178,19 +180,20 @@ fftw3_sin3d(long nx, long ny, long nz, double LX = 1.0, double LY = 1.0, double 
 
     in          = 0;
     out         = 0;
-	plan        = 0;
+    plan        = 0;
 
-	#ifdef _FFTW_OPENMP
+    #ifdef _FFTW_OPENMP
      fftw_init_threads();
     #endif
 
 
-	initialize(nx,ny,nz);
+    initialize(nx,ny,nz);
 }
 
 virtual ~fftw3_sin3d()
 {
-    if(plan != 0) fftw_destroy_plan(plan);
+    if(plan != 0) 
+    {fftw_destroy_plan(plan); fftw_cleanup();}
 
     if(in  != 0) fftw_free(in);
     if(out != 0) fftw_free(out);
@@ -203,11 +206,13 @@ virtual ~fftw3_sin3d()
 
 void initialize()
 {
-    if(plan != 0) fftw_destroy_plan(plan);
+    if(plan != 0) 
+    {fftw_destroy_plan(plan); fftw_cleanup();}
+    
     if(in   != 0) fftw_free(in);
     if(out  != 0) fftw_free(out);
 
- 	plan = 0;
+     plan = 0;
 
     in  = 0;
     out = 0;
@@ -236,7 +241,7 @@ void initialize(long nx, long ny, long nz, double LX = 1.0, double LY = 1.0, dou
     nSampleY   = ny-1;
     nSampleZ   = nz-1;
 
-    if(plan != 0) fftw_destroy_plan(plan);
+    {fftw_destroy_plan(plan); fftw_cleanup();}
 
     if(in  != 0) fftw_free(in);
     if(out != 0) fftw_free(out);
@@ -246,6 +251,11 @@ void initialize(long nx, long ny, long nz, double LX = 1.0, double LY = 1.0, dou
 
     plan = fftw_plan_r2r_3d(nSampleX, nSampleY, nSampleZ, in, out,FFTW_RODFT00,
            FFTW_RODFT00, FFTW_RODFT00,FFTW_ESTIMATE);
+
+    if(plan == nullptr)
+    {
+    throw std::runtime_error("\nXXX Error : required fftw_r2r_3d function not available \nXXX in FFTW library used (likely MKL) ");
+    }
 
     // Efficiency: From the documentation for RODFT00 transform, nSampleX+1, nSampleY+1, nSampleZ+1
     // should be a product of small primes ==> nx, ny and nz should be product of small primes.
@@ -273,25 +283,25 @@ void initialize(long nx, long ny, long nz, int nthreads, double LX = 1.0, double
 
 void fftw3d_sin_forward(GridFunction3d& inF, DoubleVector3d& outF)
 {
-	this->LX = inF.getXmax() - inF.getXmin();
- 	this->LY = inF.getYmax() - inF.getYmin();
- 	this->LZ = inF.getZmax() - inF.getZmin();
+    this->LX = inF.getXmax() - inF.getXmin();
+     this->LY = inF.getYmax() - inF.getYmin();
+     this->LZ = inF.getZmax() - inF.getZmin();
 
-	long i,j,k;
+    long i,j,k;
 
-	if((nx != inF.getXpanelCount()) || (ny != inF.getYpanelCount())|| (nz != inF.getZpanelCount()))
+    if((nx != inF.getXpanelCount()) || (ny != inF.getYpanelCount())|| (nz != inF.getZpanelCount()))
     {
     initialize(inF.getXpanelCount(),inF.getYpanelCount(),inF.getZpanelCount(),LX,LY,LZ);
     }
 
-	for(i=0; i < nSampleX; i++)
-	{
-	for(j=0; j < nSampleY; j++)
-	{
-	for(k=0; k < nSampleZ; k++)
-	{
-		in[k + nSampleZ*(j+ i*nSampleY)] = inF(i+1,j+1,k+1);
-	}}}
+    for(i=0; i < nSampleX; i++)
+    {
+    for(j=0; j < nSampleY; j++)
+    {
+    for(k=0; k < nSampleZ; k++)
+    {
+        in[k + nSampleZ*(j+ i*nSampleY)] = inF(i+1,j+1,k+1);
+    }}}
 
     fftw_execute(plan);
 
@@ -300,13 +310,13 @@ void fftw3d_sin_forward(GridFunction3d& inF, DoubleVector3d& outF)
     double scalingfactor =  sqrt(LX*LY*LZ)/(2.0*sqrt(2.0)*((double)(nx)*(double)(ny)*(double)(nz)));
 
     for(i=0; i < nSampleX; i++)
-	{
-	for(j=0; j < nSampleY; j++)
-	{
-	for(k=0; k < nSampleZ; k++)
-	{
-		outF(i,j,k) = out[k + nSampleZ*(j+ i*nSampleY)]*scalingfactor;
-	}}}
+    {
+    for(j=0; j < nSampleY; j++)
+    {
+    for(k=0; k < nSampleZ; k++)
+    {
+        outF(i,j,k) = out[k + nSampleZ*(j+ i*nSampleY)]*scalingfactor;
+    }}}
 }
 
 // fftw3d_sin_inverse argument sizes:
@@ -316,38 +326,38 @@ void fftw3d_sin_forward(GridFunction3d& inF, DoubleVector3d& outF)
 
 void fftw3d_sin_inverse(DoubleVector3d& inF, GridFunction3d& outF)
 {
-	long i,j,k;
+    long i,j,k;
 
-	this->LX = outF.getXmax() - outF.getXmin();
- 	this->LY = outF.getYmax() - outF.getYmin();
- 	this->LZ = outF.getZmax() - outF.getZmin();
+    this->LX = outF.getXmax() - outF.getXmin();
+    this->LY = outF.getYmax() - outF.getYmin();
+    this->LZ = outF.getZmax() - outF.getZmin();
 
-	if((nx != inF.getIndex1Size()+1) || (ny != inF.getIndex2Size()+1)|| (nz != inF.getIndex3Size()+1))
+    if((nx != inF.getIndex1Size()+1) || (ny != inF.getIndex2Size()+1)|| (nz != inF.getIndex3Size()+1))
     {
     initialize(inF.getIndex1Size()+1,inF.getIndex2Size()+1,inF.getIndex3Size()+1,LX,LY,LZ);
     }
 
-	for(i=0; i < nSampleX; i++)
-	{
-	for(j=0; j < nSampleY; j++)
-	{
-	for(k=0; k < nSampleZ; k++)
-	{
-		in[k + nSampleZ*(j+ i*nSampleY)] = inF(i,j,k);
-	}}}
+    for(i=0; i < nSampleX; i++)
+    {
+    for(j=0; j < nSampleY; j++)
+    {
+    for(k=0; k < nSampleZ; k++)
+    {
+        in[k + nSampleZ*(j+ i*nSampleY)] = inF(i,j,k);
+    }}}
 
     fftw_execute(plan);
 
     double scalingfactor = 1.0/(2.0*sqrt(2.0*LX*LY*LZ));
 
     for(i=0; i < nSampleX; i++)
-	{
-	for(j=0; j < nSampleY; j++)
-	{
-	for(k=0; k < nSampleZ; k++)
-	{
-		outF(i+1,j+1,k+1) = out[k + nSampleZ*(j+ i*nSampleY)]*scalingfactor;
-	}}}
+    {
+    for(j=0; j < nSampleY; j++)
+    {
+    for(k=0; k < nSampleZ; k++)
+    {
+        outF(i+1,j+1,k+1) = out[k + nSampleZ*(j+ i*nSampleY)]*scalingfactor;
+    }}}
 
     outF.setBoundaryValues(0.0);
 }
@@ -361,21 +371,21 @@ void fftw3d_sin_inverse(DoubleVector3d& inF, GridFunction3d& outF)
 
 void fftw3d_sin_forward(DoubleVector3d& F)
 {
-	long i,j,k;
+    long i,j,k;
 
-	if((nx != F.getIndex1Size()+1) || (ny != F.getIndex2Size()+1)|| (nz != F.getIndex3Size()+1))
+    if((nx != F.getIndex1Size()+1) || (ny != F.getIndex2Size()+1)|| (nz != F.getIndex3Size()+1))
     {
     initialize(F.getIndex1Size()+1,F.getIndex2Size()-1,F.getIndex3Size()+1);
     }
 
-	for(i=0; i < nSampleX; i++)
-	{
-	for(j=0; j < nSampleY; j++)
-	{
-	for(k=0; k < nSampleZ; k++)
-	{
-		in[k + nSampleZ*(j+ i*nSampleY)] = F(i,j,k);
-	}}}
+    for(i=0; i < nSampleX; i++)
+    {
+    for(j=0; j < nSampleY; j++)
+    {
+    for(k=0; k < nSampleZ; k++)
+    {
+        in[k + nSampleZ*(j+ i*nSampleY)] = F(i,j,k);
+    }}}
 
     fftw_execute(plan);
 
@@ -384,13 +394,13 @@ void fftw3d_sin_forward(DoubleVector3d& F)
     double scalingfactor = sqrt(LX*LY*LZ)/(2.0*sqrt(2.0)*((double)(nx)*(double)(ny)*(double)(nz)));
 
     for(i=0; i < nSampleX; i++)
-	{
-	for(j=0; j < nSampleY; j++)
-	{
-	for(k=0; k < nSampleZ; k++)
-	{
-		F(i,j,k) = out[k + nSampleZ*(j+ i*nSampleY)]*scalingfactor;
-	}}}
+    {
+    for(j=0; j < nSampleY; j++)
+    {
+    for(k=0; k < nSampleZ; k++)
+    {
+        F(i,j,k) = out[k + nSampleZ*(j+ i*nSampleY)]*scalingfactor;
+    }}}
 }
 
 // fftw3d_sin_forward argument sizes:
@@ -400,21 +410,21 @@ void fftw3d_sin_forward(DoubleVector3d& F)
 
 void fftw3d_sin_forward(DoubleVector3d& inF, DoubleVector3d& outF)
 {
-	long i,j,k;
+    long i,j,k;
 
-	if((nx != inF.getIndex1Size()+1) || (ny != inF.getIndex2Size()+1)|| (nz != inF.getIndex3Size()+1))
+    if((nx != inF.getIndex1Size()+1) || (ny != inF.getIndex2Size()+1)|| (nz != inF.getIndex3Size()+1))
     {
     initialize(inF.getIndex1Size()+1,inF.getIndex2Size()+1,inF.getIndex3Size()+1);
     }
 
-	for(i=0; i < nSampleX; i++)
-	{
-	for(j=0; j < nSampleY; j++)
-	{
-	for(k=0; k < nSampleZ; k++)
-	{
-		in[k + nSampleZ*(j+ i*nSampleY)] = inF(i,j,k);
-	}}}
+    for(i=0; i < nSampleX; i++)
+    {
+    for(j=0; j < nSampleY; j++)
+    {
+    for(k=0; k < nSampleZ; k++)
+    {
+        in[k + nSampleZ*(j+ i*nSampleY)] = inF(i,j,k);
+    }}}
 
     fftw_execute(plan);
 
@@ -423,15 +433,15 @@ void fftw3d_sin_forward(DoubleVector3d& inF, DoubleVector3d& outF)
     double scalingfactor =  sqrt(LX*LY*LZ)/(2.0*sqrt(2.0)*((double)(nx)*(double)(ny)*(double)(nz)));
 
     for(i=0; i < nSampleX; i++)
-	{
-	for(j=0; j < nSampleY; j++)
-	{
-	for(k=0; k < nSampleZ; k++)
-	{
-		outF(i,j,k) = out[k + nSampleZ*(j+ i*nSampleY)]*scalingfactor;
-	}}}
+    {
+    for(j=0; j < nSampleY; j++)
+    {
+    for(k=0; k < nSampleZ; k++)
+    {
+        outF(i,j,k) = out[k + nSampleZ*(j+ i*nSampleY)]*scalingfactor;
+    }}}
 }
-	
+    
 // fftw3d_sin_inverse argument sizes:
 //
 // DoubleVector3d size (nx-1) x  (ny-1) x (nz-1)
@@ -439,71 +449,71 @@ void fftw3d_sin_forward(DoubleVector3d& inF, DoubleVector3d& outF)
 
 void fftw3d_sin_inverse(DoubleVector3d& inF, DoubleVector3d& outF)
 {
-	long i,j,k;
+    long i,j,k;
 
-	if((nx != inF.getIndex1Size()+1) || (ny != inF.getIndex2Size()+1)|| (nz != inF.getIndex3Size()+1))
+    if((nx != inF.getIndex1Size()+1) || (ny != inF.getIndex2Size()+1)|| (nz != inF.getIndex3Size()+1))
     {
     initialize(inF.getIndex1Size()+1,inF.getIndex2Size()+1,inF.getIndex3Size()+1);
     }
 
-	for(i=0; i < nSampleX; i++)
-	{
-	for(j=0; j < nSampleY; j++)
-	{
-	for(k=0; k < nSampleZ; k++)
-	{
-		in[k + nSampleZ*(j+ i*nSampleY)] = inF(i,j,k);
-	}}}
+    for(i=0; i < nSampleX; i++)
+    {
+    for(j=0; j < nSampleY; j++)
+    {
+    for(k=0; k < nSampleZ; k++)
+    {
+        in[k + nSampleZ*(j+ i*nSampleY)] = inF(i,j,k);
+    }}}
 
     fftw_execute(plan);
 
     double scalingfactor = 1.0/(2.0*sqrt(2.0*LX*LY*LZ));
 
     for(i=0; i < nSampleX; i++)
-	{
-	for(j=0; j < nSampleY; j++)
-	{
-	for(k=0; k < nSampleZ; k++)
-	{
-		outF(i,j,k) = out[k + nSampleZ*(j+ i*nSampleY)]*scalingfactor;
-	}}}
+    {
+    for(j=0; j < nSampleY; j++)
+    {
+    for(k=0; k < nSampleZ; k++)
+    {
+        outF(i,j,k) = out[k + nSampleZ*(j+ i*nSampleY)]*scalingfactor;
+    }}}
 }
 
 // fftw3d_sin_inverse argument sizes:
 //
 // DoubleVector3d size (nx-1) x  (ny-1) x (nz-1)
 //
-	
+    
 void fftw3d_sin_inverse(DoubleVector3d&  F)
 {
-	long i,j,k;
+    long i,j,k;
 
-	if((nx != F.getIndex1Size()+1) || (ny != F.getIndex2Size()+1)|| (nz != F.getIndex3Size()+1))
+    if((nx != F.getIndex1Size()+1) || (ny != F.getIndex2Size()+1)|| (nz != F.getIndex3Size()+1))
     {
     initialize(F.getIndex1Size()+1,F.getIndex2Size()+1,F.getIndex3Size()+1);
     }
 
-	for(i=0; i < nSampleX; i++)
-	{
-	for(j=0; j < nSampleY; j++)
-	{
-	for(k=0; k < nSampleZ; k++)
-	{
-		in[k + nSampleZ*(j+ i*nSampleY)] = F(i,j,k);
-	}}}
+    for(i=0; i < nSampleX; i++)
+    {
+    for(j=0; j < nSampleY; j++)
+    {
+    for(k=0; k < nSampleZ; k++)
+    {
+        in[k + nSampleZ*(j+ i*nSampleY)] = F(i,j,k);
+    }}}
 
     fftw_execute(plan);
 
     double scalingfactor = 1.0/(2.0*sqrt(2.0*LX*LY*LZ));
 
     for(i=0; i < nSampleX; i++)
-	{
-	for(j=0; j < nSampleY; j++)
-	{
-	for(k=0; k < nSampleZ; k++)
-	{
-		F(i,j,k) = out[k + nSampleZ*(j+ i*nSampleY)]*scalingfactor;
-	}}}
+    {
+    for(j=0; j < nSampleY; j++)
+    {
+    for(k=0; k < nSampleZ; k++)
+    {
+        F(i,j,k) = out[k + nSampleZ*(j+ i*nSampleY)]*scalingfactor;
+    }}}
 }
 
 
@@ -517,7 +527,7 @@ private:
     long nSampleY;
     long nSampleZ;
 
-	fftw_plan plan;
+    fftw_plan plan;
 
     double*  in;
     double* out;

@@ -136,8 +136,8 @@ public:
 
 fftw3_2d()
 {
-	forwardplan = 0;
-	inverseplan = 0;
+    forwardplan = 0;
+    inverseplan = 0;
 
     in  = 0;
     out = 0;
@@ -155,15 +155,15 @@ fftw3_2d()
 
 fftw3_2d(const fftw3_2d& DFT)
 {
-	if(DFT.forwardplan == 0)
-	{
-		in  = 0;
+    if(DFT.forwardplan == 0)
+    {
+        in  = 0;
         out = 0;
-	    forwardplan = 0;
-	    inverseplan = 0;
-		initialize();
-		return;
-	}
+        forwardplan = 0;
+        inverseplan = 0;
+        initialize();
+        return;
+    }
 
 #ifdef _FFTW_OPENMP
      fftw_init_threads();
@@ -180,20 +180,27 @@ fftw3_2d(long nx, long ny, double LX = 1.0, double LY = 1.0)
 
     in          = 0;
     out         = 0;
-	forwardplan = 0;
-	inverseplan = 0;
+    forwardplan = 0;
+    inverseplan = 0;
 
 #ifdef _FFTW_OPENMP
      fftw_init_threads();
 #endif
 
-	initialize(nx,ny);
+    initialize(nx,ny);
 }
 
 virtual ~fftw3_2d()
 {
-    if(forwardplan != 0) fftw_destroy_plan(forwardplan);
-    if(inverseplan != 0) fftw_destroy_plan(inverseplan); 
+    bool cleanupFlag = false;
+    
+    if(forwardplan != 0) 
+    { fftw_destroy_plan(forwardplan); cleanupFlag = true;}
+    
+    if(inverseplan != 0) 
+    {fftw_destroy_plan(inverseplan);  cleanupFlag = true;}
+    
+    if(cleanupFlag) {fftw_cleanup();}
     
     if(in  != 0) fftw_free(in); 
     if(out != 0) fftw_free(out);
@@ -213,14 +220,22 @@ void initialize(long nx, long ny, int nthreads, double LX = 1.0, double LY = 1.0
 
 void initialize()
 {
-    if(forwardplan != 0) fftw_destroy_plan(forwardplan);
-    if(inverseplan != 0) fftw_destroy_plan(inverseplan); 
+    bool cleanupFlag = false;
+    
+    if(forwardplan != 0) 
+    { fftw_destroy_plan(forwardplan); cleanupFlag = true;}
+    
+    if(inverseplan != 0) 
+    {fftw_destroy_plan(inverseplan);  cleanupFlag = true;}
+    
+    if(cleanupFlag) {fftw_cleanup();}
+    
     
     if(in  != 0) fftw_free(in); 
     if(out != 0) fftw_free(out);
 
- 	forwardplan = 0;
-	inverseplan = 0;
+    forwardplan = 0;
+    inverseplan = 0;
 
     in  = 0;
     out = 0;
@@ -234,12 +249,21 @@ void initialize()
 
 void initialize(long nx, long ny, double LX = 1.0, double LY = 1.0)
 {
+    bool cleanupFlag;
     if((this->nx != nx)||(this->ny != ny))
     {
     this-> nx = nx;
     this-> ny = ny;
-    if(forwardplan != 0) fftw_destroy_plan(forwardplan);
-    if(inverseplan != 0) fftw_destroy_plan(inverseplan); 
+    cleanupFlag = false;
+    
+    if(forwardplan != 0) 
+    { fftw_destroy_plan(forwardplan); cleanupFlag = true;}
+    
+    if(inverseplan != 0) 
+    {fftw_destroy_plan(inverseplan);  cleanupFlag = true;}
+    
+    if(cleanupFlag) {fftw_cleanup();}
+    
 
     if(in  != 0) fftw_free(in); 
     if(out != 0) fftw_free(out);
@@ -269,40 +293,40 @@ void initialize(long nx, long ny, double LX = 1.0, double LY = 1.0)
 void fftw2d_forward(DoubleVector2d& inReal, DoubleVector2d& inImag,
 DoubleVector2d& outReal, DoubleVector2d& outImag)
 {
-	long i,j,k;
+    long i,j,k;
 
-	if((nx != inReal.getIndex1Size())
+    if((nx != inReal.getIndex1Size())
     || (ny != inReal.getIndex2Size()))
     { 
     initialize(inReal.getIndex1Size(),
                inReal.getIndex2Size());
     }
 
-	//reorder input
-	
-	for(i=0; i < nx; i++)
-	{
-	for(j=0; j < ny; j++)
-	{
-		k = j + ny*i;
+    //reorder input
+    
+    for(i=0; i < nx; i++)
+    {
+    for(j=0; j < ny; j++)
+    {
+        k = j + ny*i;
 
-		in[k][0] = inReal(i,j);
-		in[k][1] = inImag(i,j);
-	}}
+        in[k][0] = inReal(i,j);
+        in[k][1] = inImag(i,j);
+    }}
 
     fftw_execute(forwardplan);
-	
+    
     double scalingfactor =sqrt(LX*LY)/(nx*ny);
 
-	for(k=0; k < nx*ny; k++)
-	{
-	
-		i = (k/ny + (nx/2) )%nx ;//NB: uses integer division of odd numbers
-		j = (k%ny + (ny/2) )%ny ;//NB: uses integer division of odd numbers
+    for(k=0; k < nx*ny; k++)
+    {
+    
+        i = (k/ny + (nx/2) )%nx ;//NB: uses integer division of odd numbers
+        j = (k%ny + (ny/2) )%ny ;//NB: uses integer division of odd numbers
 
-		outReal(i,j) = out[k][0]*scalingfactor;
-		outImag(i,j) = out[k][1]*scalingfactor;
-	}
+        outReal(i,j) = out[k][0]*scalingfactor;
+        outImag(i,j) = out[k][1]*scalingfactor;
+    }
 }
 
 
@@ -314,44 +338,44 @@ DoubleVector2d& outReal, DoubleVector2d& outImag)
 void fftw2d_inverse(DoubleVector2d& inReal, DoubleVector2d& inImag,
 DoubleVector2d& outReal, DoubleVector2d& outImag)
 {
-	long i,j,k;
-	long newindex1, newindex2;
+    long i,j,k;
+    long newindex1, newindex2;
 
-	if((nx != inReal.getIndex1Size())
+    if((nx != inReal.getIndex1Size())
     || (ny != inReal.getIndex2Size()))
     { 
     initialize(inReal.getIndex1Size(),
                inReal.getIndex2Size());
     }
 
-	//reorder input
-	
-	for(i=0; i < nx; i++)
-	{
-	for(j=0; j < ny; j++)
-	{
-		newindex1 = (i - (nx/2) + nx )%nx ;//NB: uses integer division of odd numbers
-		newindex2 = (j - (ny/2) + ny )%ny ;//NB: uses integer division of odd numbers
+    //reorder input
+    
+    for(i=0; i < nx; i++)
+    {
+    for(j=0; j < ny; j++)
+    {
+        newindex1 = (i - (nx/2) + nx )%nx ;//NB: uses integer division of odd numbers
+        newindex2 = (j - (ny/2) + ny )%ny ;//NB: uses integer division of odd numbers
 
-		k = newindex2 + ny*newindex1;
+        k = newindex2 + ny*newindex1;
 
-		in[k][0] = inReal(i, j);
-		in[k][1] = inImag(i, j);
-	}}
+        in[k][0] = inReal(i, j);
+        in[k][1] = inImag(i, j);
+    }}
 
-	//transform
+    //transform
 
-	fftw_execute(inverseplan);
+    fftw_execute(inverseplan);
 
-	double scalingfactor =1.0/sqrt(LX*LY);
+    double scalingfactor =1.0/sqrt(LX*LY);
 
-	for(k=0; k < nx*ny; k++)
-	{
-		i = k/ny;
-		j = k%ny;
-		outReal(i,j) = out[k][0]*scalingfactor;
-		outImag(i,j) = out[k][1]*scalingfactor;
-	}
+    for(k=0; k < nx*ny; k++)
+    {
+        i = k/ny;
+        j = k%ny;
+        outReal(i,j) = out[k][0]*scalingfactor;
+        outImag(i,j) = out[k][1]*scalingfactor;
+    }
 }
 
 
@@ -364,44 +388,44 @@ DoubleVector2d& outReal, DoubleVector2d& outImag)
 void fftw2d_forward(GridFunction2d& inReal, GridFunction2d& inImag,
 DoubleVector2d& outReal, DoubleVector2d& outImag)
 {
-	long i,j,k;
+    long i,j,k;
 
-	this->LX = inReal.getXmax() - inReal.getXmin();
- 	this->LY = inReal.getYmax() - inReal.getYmin();
+    this->LX = inReal.getXmax() - inReal.getXmin();
+     this->LY = inReal.getYmax() - inReal.getYmin();
 
-	if((nx != inReal.getXpanelCount())
+    if((nx != inReal.getXpanelCount())
     || (ny != inReal.getYpanelCount()))
     {
     initialize(inReal.getXpanelCount(),
                inReal.getYpanelCount(),LX,LY);
     }
 
-	// Capture and re-order input. This extraction
-	// ignores the periodically defined values at
-	// the outer edges of the computational domain.
+    // Capture and re-order input. This extraction
+    // ignores the periodically defined values at
+    // the outer edges of the computational domain.
 
-	for(i=0; i < nx; i++)
-	{
-	for(j=0; j < ny; j++)
-	{
-		k = j + ny*i;//for changing from column to row ordering
+    for(i=0; i < nx; i++)
+    {
+    for(j=0; j < ny; j++)
+    {
+        k = j + ny*i;//for changing from column to row ordering
 
-		in[k][0] = inReal(i,j);
-		in[k][1] = inImag(i,j);
-	}}
+        in[k][0] = inReal(i,j);
+        in[k][1] = inImag(i,j);
+    }}
 
     fftw_execute(forwardplan);
 
     double scalingfactor = sqrt(LX*LY)/(nx*ny);
 
-	for(k=0; k < nx*ny; k++)
-	{
-		i = (k/ny + (nx/2) )%nx ;//NB: uses integer division of odd numbers
-		j = (k%ny + (ny/2) )%ny ;//NB: uses integer division of odd numbers
+    for(k=0; k < nx*ny; k++)
+    {
+        i = (k/ny + (nx/2) )%nx ;//NB: uses integer division of odd numbers
+        j = (k%ny + (ny/2) )%ny ;//NB: uses integer division of odd numbers
 
-		outReal( i,j) = out[k][0]*scalingfactor;
-		outImag( i,j) = out[k][1]*scalingfactor;
-	}
+        outReal( i,j) = out[k][0]*scalingfactor;
+        outImag( i,j) = out[k][1]*scalingfactor;
+    }
 }
 
 
@@ -414,52 +438,52 @@ DoubleVector2d& outReal, DoubleVector2d& outImag)
 void fftw2d_inverse(DoubleVector2d& inReal, DoubleVector2d& inImag,
 GridFunction2d& outReal, GridFunction2d& outImag)
 {
-	long i,j,k;
-	long newindex1, newindex2;
+    long i,j,k;
+    long newindex1, newindex2;
 
     this->LX = outReal.getXmax() - outReal.getXmin();
- 	this->LY = outReal.getYmax() - outReal.getYmin();
+     this->LY = outReal.getYmax() - outReal.getYmin();
 
-	if((nx != inReal.getIndex1Size())
+    if((nx != inReal.getIndex1Size())
     || (ny != inReal.getIndex2Size()))
     {
     initialize(inReal.getIndex1Size(),
                inReal.getIndex2Size(),LX,LY);
     }
 
-	//reorder input
+    //reorder input
 
-	for(i=0; i < nx; i++)
-	{
-	for(j=0; j < ny; j++)
-	{
-		newindex1 = (i - (nx/2) + nx )%nx ;//NB: uses integer division of odd numbers
-		newindex2 = (j - (ny/2) + ny )%ny ;//NB: uses integer division of odd numbers
+    for(i=0; i < nx; i++)
+    {
+    for(j=0; j < ny; j++)
+    {
+        newindex1 = (i - (nx/2) + nx )%nx ;//NB: uses integer division of odd numbers
+        newindex2 = (j - (ny/2) + ny )%ny ;//NB: uses integer division of odd numbers
 
-		k = newindex2 + ny*newindex1;
+        k = newindex2 + ny*newindex1;
 
-		in[k][0] = inReal(i, j);
-		in[k][1] = inImag(i, j);
-	}}
+        in[k][0] = inReal(i, j);
+        in[k][1] = inImag(i, j);
+    }}
 
-	//transform
+    //transform
 
-	fftw_execute(inverseplan);
+    fftw_execute(inverseplan);
 
-	double scalingfactor = 1.0/sqrt(LX*LY);
+    double scalingfactor = 1.0/sqrt(LX*LY);
 
-	for(k=0; k < nx*ny; k++)
-	{
-		i = k/ny;
-		j = k%ny;
-		outReal(i,j) = out[k][0]*scalingfactor;
-		outImag(i,j) = out[k][1]*scalingfactor;
-	}
+    for(k=0; k < nx*ny; k++)
+    {
+        i = k/ny;
+        j = k%ny;
+        outReal(i,j) = out[k][0]*scalingfactor;
+        outImag(i,j) = out[k][1]*scalingfactor;
+    }
 
-	// Enforce periodicity of output GridFunction2d
+    // Enforce periodicity of output GridFunction2d
 
-	outReal.enforcePeriodicity();
-	outImag.enforcePeriodicity();
+    outReal.enforcePeriodicity();
+    outImag.enforcePeriodicity();
 }
 
 
@@ -468,8 +492,8 @@ private:
     long nx;   long ny;
     double LX; double LY;
 
-	fftw_plan forwardplan;
-	fftw_plan inverseplan;
+    fftw_plan forwardplan;
+    fftw_plan inverseplan;
 
     fftw_complex*  in;
     fftw_complex* out;

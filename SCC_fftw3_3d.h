@@ -149,8 +149,8 @@ public:
 
 fftw3_3d()
 {
-	forwardplan = 0;
-	inverseplan = 0;
+    forwardplan = 0;
+    inverseplan = 0;
 
     in  = 0;
     out = 0;
@@ -171,15 +171,15 @@ fftw3_3d()
 
 fftw3_3d(const fftw3_3d& DFT)
 {
-	if(DFT.forwardplan == 0)
-	{
-		in  = 0;
+    if(DFT.forwardplan == 0)
+    {
+        in  = 0;
         out = 0;
-	    forwardplan = 0;
-	    inverseplan = 0;
-		initialize();
-		return;
-	}
+        forwardplan = 0;
+        inverseplan = 0;
+        initialize();
+        return;
+    }
 
 #ifdef _FFTW_OPENMP
      fftw_init_threads();
@@ -199,20 +199,27 @@ fftw3_3d(long nx, long ny, long nz, double LX = 1.0, double LY = 1.0, double LZ 
 
     in          = 0;
     out         = 0;
-	forwardplan = 0;
-	inverseplan = 0;
+    forwardplan = 0;
+    inverseplan = 0;
 
 #ifdef _FFTW_OPENMP
      fftw_init_threads();
 #endif
 
-	initialize(nx,ny,nz,LZ,LY,LZ);
+    initialize(nx,ny,nz,LZ,LY,LZ);
 }
 
 virtual ~fftw3_3d()
 {
-    if(forwardplan != 0) fftw_destroy_plan(forwardplan);
-    if(inverseplan != 0) fftw_destroy_plan(inverseplan); 
+    bool cleanupFlag = false;
+    
+    if(forwardplan != 0) 
+    { fftw_destroy_plan(forwardplan); cleanupFlag = true;}
+    
+    if(inverseplan != 0) 
+    {fftw_destroy_plan(inverseplan); cleanupFlag = true;}
+    
+    if(cleanupFlag) {fftw_cleanup();}
     
     if(in  != 0) fftw_free(in); 
     if(out != 0) fftw_free(out);
@@ -224,14 +231,21 @@ virtual ~fftw3_3d()
 
 void initialize()
 {
-    if(forwardplan != 0) fftw_destroy_plan(forwardplan);
-    if(inverseplan != 0) fftw_destroy_plan(inverseplan); 
+    bool cleanupFlag = false;
+    
+    if(forwardplan != 0) 
+    { fftw_destroy_plan(forwardplan); cleanupFlag = true;}
+    
+    if(inverseplan != 0) 
+    {fftw_destroy_plan(inverseplan);  cleanupFlag = true;}
+    
+    if(cleanupFlag) {fftw_cleanup();}
     
     if(in  != 0) fftw_free(in); 
     if(out != 0) fftw_free(out);
 
- 	forwardplan = 0;
-	inverseplan = 0;
+    forwardplan = 0;
+    inverseplan = 0;
 
     in  = 0;
     out = 0;
@@ -247,13 +261,23 @@ void initialize()
 
 void initialize(long nx, long ny, long nz, double LX = 1.0, double LY = 1.0, double LZ = 1.0)
 {
+
+    bool cleanupFlag;
+    
     if((this->nx != nx)||(this->ny != ny)||(this->nz != nz))
     {
     this->nx = nx;
     this->ny = ny;
     this->nz = nz;
-    if(forwardplan != 0) fftw_destroy_plan(forwardplan);
-    if(inverseplan != 0) fftw_destroy_plan(inverseplan); 
+
+    cleanupFlag = false;
+    if(forwardplan != 0) 
+    { fftw_destroy_plan(forwardplan); cleanupFlag = true;}
+    
+    if(inverseplan != 0) 
+    {fftw_destroy_plan(inverseplan); cleanupFlag = true;}
+    
+    if(cleanupFlag) {fftw_cleanup();}
 
     if(in  != 0) fftw_free(in); 
     if(out != 0) fftw_free(out);
@@ -293,16 +317,16 @@ void initialize(long nx, long ny, long nz, int nthreads)
 void fftw3d_forward(GridFunction3d& inReal, GridFunction3d& inImag,
 DoubleVector3d& outReal, DoubleVector3d& outImag)
 {
-	long i,j,k,p;
-	long oldindex1, oldindex2, oldindex3;
+    long i,j,k,p;
+    long oldindex1, oldindex2, oldindex3;
 
-	this->LX = inReal.getXmax() - inReal.getXmin();
- 	this->LY = inReal.getYmax() - inReal.getYmin();
- 	this->LZ = inReal.getZmax() - inReal.getZmin();
+    this->LX = inReal.getXmax() - inReal.getXmin();
+    this->LY = inReal.getYmax() - inReal.getYmin();
+    this->LZ = inReal.getZmax() - inReal.getZmin();
 
 
-	if((nx != inReal.getXpanelCount())
-	|| (ny != inReal.getYpanelCount())
+    if((nx != inReal.getXpanelCount())
+    || (ny != inReal.getYpanelCount())
     || (nz != inReal.getZpanelCount()))
     {
     initialize(inReal.getXpanelCount(),
@@ -310,43 +334,43 @@ DoubleVector3d& outReal, DoubleVector3d& outImag)
                inReal.getZpanelCount(),LX,LY,LZ);
     }
 
-	// Capture and re-order input. This extraction
-	// ignores the periodically defined values at
-	// the outer edges of the computational domain.
+    // Capture and re-order input. This extraction
+    // ignores the periodically defined values at
+    // the outer edges of the computational domain.
 
-	for(i=0; i < nx; i++)
-	{
-	for(j=0; j < ny; j++)
-	{
+    for(i=0; i < nx; i++)
+    {
+    for(j=0; j < ny; j++)
+    {
     for(k=0; k < nz; k++)
-	{
-		p =  k + nz*(j + i*ny);
+    {
+        p =  k + nz*(j + i*ny);
 
-		in[p][0] = inReal(i,j,k);
-		in[p][1] = inImag(i,j,k);
-	}}}
+        in[p][0] = inReal(i,j,k);
+        in[p][1] = inImag(i,j,k);
+    }}}
 
     fftw_execute(forwardplan);
 
     //reorder AND scale output
 
-	double scalingfactor = sqrt(LX*LY*LZ)/(nx*ny*nz);
+    double scalingfactor = sqrt(LX*LY*LZ)/(nx*ny*nz);
 
 
-	for(p=0; p < nx*ny*nz; p++)
-	{
+    for(p=0; p < nx*ny*nz; p++)
+    {
 
         oldindex1 = (p/nz)/ny;
         oldindex2 = (p/nz)%ny;
         oldindex3 = p%nz;
 
-		i = (oldindex1 + (nx/2) )%nx ;//NB: uses integer division of odd numbers
-		j = (oldindex2 + (ny/2) )%ny ;//NB: uses integer division of odd numbers
-		k = (oldindex3 + (nz/2) )%nz ;//NB: uses integer division of odd numbers
+        i = (oldindex1 + (nx/2) )%nx ;//NB: uses integer division of odd numbers
+        j = (oldindex2 + (ny/2) )%ny ;//NB: uses integer division of odd numbers
+        k = (oldindex3 + (nz/2) )%nz ;//NB: uses integer division of odd numbers
 
-		outReal(i,j,k) = out[p][0]*scalingfactor;
-		outImag(i,j,k) = out[p][1]*scalingfactor;
-	}
+        outReal(i,j,k) = out[p][0]*scalingfactor;
+        outImag(i,j,k) = out[p][1]*scalingfactor;
+    }
 }
 
 
@@ -360,17 +384,17 @@ DoubleVector3d& outReal, DoubleVector3d& outImag)
 void fftw3d_inverse(DoubleVector3d& inReal, DoubleVector3d& inImag,
 GridFunction3d& outReal, GridFunction3d& outImag)
 {
-	long i,j,k;
-	long p;
+    long i,j,k;
+    long p;
 
     this->LX = outReal.getXmax() - outReal.getXmin();
- 	this->LY = outReal.getYmax() - outReal.getYmin();
- 	this->LZ = outReal.getZmax() - outReal.getZmin();
+    this->LY = outReal.getYmax() - outReal.getYmin();
+    this->LZ = outReal.getZmax() - outReal.getZmin();
 
-	long newindex1,newindex2,newindex3;
+    long newindex1,newindex2,newindex3;
 
-	if((nx != inReal.getIndex1Size())
-	|| (ny != inReal.getIndex2Size())
+    if((nx != inReal.getIndex1Size())
+    || (ny != inReal.getIndex2Size())
     || (nz != inReal.getIndex3Size()))
     {
     initialize( inReal.getIndex1Size(),
@@ -378,46 +402,46 @@ GridFunction3d& outReal, GridFunction3d& outImag)
                 inReal.getIndex3Size(),LX,LY,LZ);
     }
 
-	for(i=0; i < nx; i++)
-	{
-	for(j=0; j < ny; j++)
-	{
+    for(i=0; i < nx; i++)
+    {
+    for(j=0; j < ny; j++)
+    {
     for(k=0; k < nz; k++)
-	{
-		newindex1 = (i - (nx/2) + nx )%nx ;//NB: uses integer division of odd numbers
-		newindex2 = (j - (ny/2) + ny )%ny ;//NB: uses integer division of odd numbers
-		newindex3 = (k - (nz/2) + nz )%nz ;//NB: uses integer division of odd numbers
+    {
+        newindex1 = (i - (nx/2) + nx )%nx ;//NB: uses integer division of odd numbers
+        newindex2 = (j - (ny/2) + ny )%ny ;//NB: uses integer division of odd numbers
+        newindex3 = (k - (nz/2) + nz )%nz ;//NB: uses integer division of odd numbers
 
-		p =  newindex3 + nz*(newindex2 + newindex1*ny);
+        p =  newindex3 + nz*(newindex2 + newindex1*ny);
 
-		in[p][0] = inReal( i, j, k);
-		in[p][1] = inImag( i, j, k);
-	}}}
+        in[p][0] = inReal( i, j, k);
+        in[p][1] = inImag( i, j, k);
+    }}}
 
-	//transform
+    //transform
 
-	fftw_execute(inverseplan);
+    fftw_execute(inverseplan);
 
-	double scalefactor = 1.0/sqrt(LX*LY*LZ);
+    double scalefactor = 1.0/sqrt(LX*LY*LZ);
 
-	for(p=0; p < nx*ny*nz; p++)
-	{
+    for(p=0; p < nx*ny*nz; p++)
+    {
         //  p =  k + nz*(j + i*ny) = k + nz*j + i*nz*ny
         //  =>  p/nz =  j + i*ny
         //
 
-		i = (p/nz)/ny;
+        i = (p/nz)/ny;
         j = (p/nz)%ny;
         k = p%nz;
 
-		outReal(i,j,k) = out[p][0]*scalefactor;
-		outImag(i,j,k) = out[p][1]*scalefactor;
-	}
+        outReal(i,j,k) = out[p][0]*scalefactor;
+        outImag(i,j,k) = out[p][1]*scalefactor;
+    }
 
-	// Enforce periodicity of output GridFunction3d's
+    // Enforce periodicity of output GridFunction3d's
 
-	outReal.enforcePeriodicity();
-	outImag.enforcePeriodicity();
+    outReal.enforcePeriodicity();
+    outImag.enforcePeriodicity();
 }
 // fftw3d_forward argument sizes:
 //
@@ -427,11 +451,11 @@ GridFunction3d& outReal, GridFunction3d& outImag)
 void fftw3d_forward(DoubleVector3d& inReal, DoubleVector3d& inImag,
 DoubleVector3d& outReal, DoubleVector3d& outImag)
 {
-	long i,j,k,p;
-	long oldindex1, oldindex2, oldindex3;
+    long i,j,k,p;
+    long oldindex1, oldindex2, oldindex3;
 
-	if((nx != inReal.getIndex1Size())
-	|| (ny != inReal.getIndex2Size())
+    if((nx != inReal.getIndex1Size())
+    || (ny != inReal.getIndex2Size())
     || (nz != inReal.getIndex3Size()))
     {
     initialize(inReal.getIndex1Size(),
@@ -439,40 +463,40 @@ DoubleVector3d& outReal, DoubleVector3d& outImag)
                inReal.getIndex3Size());
     }
 
-	//reorder input
+    //reorder input
 
-	for(i=0; i < nx; i++)
-	{
-	for(j=0; j < ny; j++)
-	{
+    for(i=0; i < nx; i++)
+    {
+    for(j=0; j < ny; j++)
+    {
     for(k=0; k < nz; k++)
-	{
-		p =  k + nz*(j + i*ny);
+    {
+        p =  k + nz*(j + i*ny);
 
-		in[p][0] = inReal(i,j,k);
-		in[p][1] = inImag(i,j,k);
-	}}}
+        in[p][0] = inReal(i,j,k);
+        in[p][1] = inImag(i,j,k);
+    }}}
 
     fftw_execute(forwardplan);
 
     //reorder AND scale output
 
-	double scalingfactor = sqrt(LX*LY*LZ)/(nx*ny*nz);
+    double scalingfactor = sqrt(LX*LY*LZ)/(nx*ny*nz);
 
-	for(p=0; p < nx*ny*nz; p++)
-	{
+    for(p=0; p < nx*ny*nz; p++)
+    {
 
         oldindex1 = (p/nz)/ny;
         oldindex2 = (p/nz)%ny;
         oldindex3 = p%nz;
 
-		i = (oldindex1 + (nx/2) )%nx ;//NB: uses integer division of odd numbers
-		j = (oldindex2 + (ny/2) )%ny ;//NB: uses integer division of odd numbers
-		k = (oldindex3 + (nz/2) )%nz ;//NB: uses integer division of odd numbers
+        i = (oldindex1 + (nx/2) )%nx ;//NB: uses integer division of odd numbers
+        j = (oldindex2 + (ny/2) )%ny ;//NB: uses integer division of odd numbers
+        k = (oldindex3 + (nz/2) )%nz ;//NB: uses integer division of odd numbers
 
-		outReal(i,j,k) = out[p][0]*scalingfactor;
-		outImag(i,j,k) = out[p][1]*scalingfactor;
-	}
+        outReal(i,j,k) = out[p][0]*scalingfactor;
+        outImag(i,j,k) = out[p][1]*scalingfactor;
+    }
 }
 
 // fftw3d_inverse argument sizes:
@@ -482,13 +506,13 @@ DoubleVector3d& outReal, DoubleVector3d& outImag)
 void fftw3d_inverse(DoubleVector3d& inReal, DoubleVector3d& inImag,
 DoubleVector3d& outReal, DoubleVector3d& outImag)
 {
-	long i,j,k;
-	long p;
+    long i,j,k;
+    long p;
 
-	long newindex1,newindex2,newindex3;
+    long newindex1,newindex2,newindex3;
 
-	if((nx != inReal.getIndex1Size())
-	|| (ny != inReal.getIndex2Size())
+    if((nx != inReal.getIndex1Size())
+    || (ny != inReal.getIndex2Size())
     || (nz != inReal.getIndex3Size()))
     {
     initialize( inReal.getIndex1Size(),
@@ -496,41 +520,41 @@ DoubleVector3d& outReal, DoubleVector3d& outImag)
                 inReal.getIndex3Size());
     }
 
-	for(i=0; i < nx; i++)
-	{
-	for(j=0; j < ny; j++)
-	{
+    for(i=0; i < nx; i++)
+    {
+    for(j=0; j < ny; j++)
+    {
     for(k=0; k < nz; k++)
-	{
-		newindex1 = (i - (nx/2) + nx )%nx ;//NB: uses integer division of odd numbers
-		newindex2 = (j - (ny/2) + ny )%ny ;//NB: uses integer division of odd numbers
-		newindex3 = (k - (nz/2) + nz )%nz ;//NB: uses integer division of odd numbers
+    {
+        newindex1 = (i - (nx/2) + nx )%nx ;//NB: uses integer division of odd numbers
+        newindex2 = (j - (ny/2) + ny )%ny ;//NB: uses integer division of odd numbers
+        newindex3 = (k - (nz/2) + nz )%nz ;//NB: uses integer division of odd numbers
 
-		p =  newindex3 + nz*(newindex2 + newindex1*ny);
+        p =  newindex3 + nz*(newindex2 + newindex1*ny);
 
-		in[p][0] = inReal( i, j, k);
-		in[p][1] = inImag( i, j, k);
-	}}}
+        in[p][0] = inReal( i, j, k);
+        in[p][1] = inImag( i, j, k);
+    }}}
 
-	//transform
+    //transform
 
-	fftw_execute(inverseplan);
+    fftw_execute(inverseplan);
 
     double scaleingfactor = 1.0/sqrt(LX*LY*LZ);
 
-	for(p=0; p < nx*ny*nz; p++)
-	{
+    for(p=0; p < nx*ny*nz; p++)
+    {
         //  p =  k + nz*(j + i*ny) = k + nz*j + i*nz*ny
         //  =>  p/nz =  j + i*ny
         //
 
-		i = (p/nz)/ny;
+        i = (p/nz)/ny;
         j = (p/nz)%ny;
         k = p%nz;
 
-		outReal(i,j,k) = out[p][0]*scaleingfactor;
-		outImag(i,j,k) = out[p][1]*scaleingfactor;
-	}
+        outReal(i,j,k) = out[p][0]*scaleingfactor;
+        outImag(i,j,k) = out[p][1]*scaleingfactor;
+    }
 }
 
 
@@ -538,8 +562,8 @@ DoubleVector3d& outReal, DoubleVector3d& outImag)
     long   nx;   long ny;   long nz;
     double LX; double LY; double LZ;
 
-	fftw_plan forwardplan;
-	fftw_plan inverseplan;
+    fftw_plan forwardplan;
+    fftw_plan inverseplan;
 
     fftw_complex*  in;
     fftw_complex* out;
