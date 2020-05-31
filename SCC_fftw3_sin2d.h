@@ -5,9 +5,8 @@
 #include <exception>
 
 
-
-#ifndef _SCC_fftw3_sin2d_
-#define _SCC_fftw3_sin2d_
+#ifndef SCC_FFTW3_SIN_2D_
+#define SCC_FFTW3_SIN_2D_
 //
 //####################################################################
 //          SCC_fftw3_sin2d.h : Version Nov. 12 2015

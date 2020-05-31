@@ -6,8 +6,8 @@
 #include <omp.h>
 #endif
 
-#ifndef _SCC_fftw3_3d_
-#define _SCC_fftw3_3d_
+#ifndef SCC_FFTW3_3D_
+#define SCC_FFTW3_3D_
 //
 //####################################################################
 //          fftw3_3d.h : Version  Nov. 12, 2015

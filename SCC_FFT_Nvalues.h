@@ -43,9 +43,9 @@
 #include <cstdlib>
  
 
-#ifndef _SCC_FFT_Nvalues_
-#define _SCC_FFT_Nvalues_
-#define _DEFAULT_MAXIMAL_PRIME_INDEX_ 6
+#ifndef SCC_FFT_VALUES_
+#define SCC_FFT_VALUES_
+#define DEFAULT_MAXIMAL_PRIME_INDEX_ 6
 namespace SCC
 {
 class FFT_Nvalues
@@ -55,7 +55,7 @@ public:
 
 	FFT_Nvalues()
 	{
-	primeIndex = _DEFAULT_MAXIMAL_PRIME_INDEX_;
+	primeIndex = DEFAULT_MAXIMAL_PRIME_INDEX_;
 	}
 
 	//
@@ -147,6 +147,6 @@ public:
 };
 }
 
-#undef _DEFAULT_MAXIMAL_PRIME_INDEX_
+#undef DEFAULT_MAXIMAL_PRIME_INDEX_
 #endif
 

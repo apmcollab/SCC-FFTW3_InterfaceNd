@@ -7,8 +7,8 @@
 #include "../DoubleVectorNd/SCC_DoubleVector1d.h"   // Array Class Header
 #include "../GridFunctionNd/SCC_GridFunction1d.h"   // GridFunction Class Header
 
-#ifndef _SCC_fftw3_1d_
-#define _SCC_fftw3_1d_
+#ifndef SCC_FFTW3_1D_
+#define SCC_FFTW3_1D_
 
 namespace SCC
 {

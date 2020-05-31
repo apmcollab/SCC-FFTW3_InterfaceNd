@@ -2,8 +2,8 @@
 #include "../DoubleVectorNd/SCC_DoubleVector2d.h"
 #include "../GridFunctionNd/SCC_GridFunction2d.h"
 
-#ifndef _SCC_fftw3_2d_
-#define _SCC_fftw3_2d_
+#ifndef SCC_FFTW3_2D_
+#define SCC_FFTW3_2D_
 //
 //####################################################################
 //          fftw3_2d.h : Version Nov. 11, 2015

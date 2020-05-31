@@ -9,8 +9,9 @@
 #include <omp.h>
 #endif
 
-#ifndef _SCC_fftw3_sin3d_
-#define _SCC_fftw3_sin3d_
+
+#ifndef SCC_FFTW3_SIN_3D_
+#define SCC_FFTW3_SIN_3D_
 
 //
 //####################################################################

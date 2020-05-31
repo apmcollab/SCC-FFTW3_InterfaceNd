@@ -1,7 +1,11 @@
 #include "fftw3.h"                   // fftw3 headers
 #include "../DoubleVectorNd/SCC_DoubleVector1d.h"    // Array Class Header
-#ifndef _SCC_fftw3_cos1d_
-#define _SCC_fftw3_cos1d_
+
+
+#ifndef SCC_FFTW3_COS_1D_
+#define SCC_FFTW3_COS_1D_
+
+
 //
 //####################################################################
 //                fftw3_cos1d.h : Version Nov 11, 2015

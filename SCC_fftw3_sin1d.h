@@ -4,8 +4,8 @@
 #include "../GridFunctionNd/SCC_GridFunction1d.h"    // Grid function class header
 
 
-#ifndef _SCC_fftw3_sin1d_
-#define _SCC_fftw3_sin1d_
+#ifndef SCC_FFTW3_SIN_1D_
+#define SCC_FFTW3_SIN_1D_
 //
 //####################################################################
 //                fftw3_sin1d.h : Version Nov 12, 2015
