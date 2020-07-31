@@ -132,9 +132,9 @@ public:
 
 fftw3_sin2d()
 {
-    plan = 0;
-    in  = 0;
-    out = 0;
+    plan = nullptr;
+    in  = nullptr;
+    out = nullptr;
 
     nx  = 0;
     ny  = 0;
@@ -160,36 +160,35 @@ fftw3_sin2d(long nx, long ny,double LX = 1.0, double LY = 1.0)
     nSampleX   = nx-1;
     nSampleY   = ny-1;
 
-    in          = 0;
-    out         = 0;
-    plan        = 0;
+    in          = nullptr;
+    out         = nullptr;
+    plan        = nullptr;
 
     initialize(nx,ny);
 }
 
 virtual ~fftw3_sin2d()
 {
-    if(plan != 0) 
-    {fftw_destroy_plan(plan); fftw_cleanup();}
+    if(plan != nullptr) {fftw_destroy_plan(plan); /*fftw_cleanup();*/}
 
-    if(in  != 0) fftw_free(in);
-    if(out != 0) fftw_free(out);
+    if(in  != nullptr) fftw_free(in);
+    if(out != nullptr) fftw_free(out);
 
 }
 
 void initialize()
 {
-    if(plan != 0) 
-    {fftw_destroy_plan(plan); fftw_cleanup();};
+    if(plan != nullptr)
+    {fftw_destroy_plan(plan); /*fftw_cleanup();*/};
 
-    if(in  != 0) fftw_free(in);
-    if(out != 0) fftw_free(out);
+    if(in  != nullptr) fftw_free(in);
+    if(out != nullptr) fftw_free(out);
 
 
-    plan = 0;
+    plan = nullptr;
 
-    in  = 0;
-    out = 0;
+    in  = nullptr;
+    out = nullptr;
 
     nx  = 0;
     ny  = 0;
@@ -209,11 +208,11 @@ void initialize(long nx, long ny,double LX = 1.0, double LY = 1.0)
     this->ny   = ny;
     nSampleX   = nx-1;
     nSampleY   = ny-1;
-    if(plan != 0) 
-    {fftw_destroy_plan(plan); fftw_cleanup();}
+    if(plan != nullptr)
+    {fftw_destroy_plan(plan); /*fftw_cleanup();*/}
 
-    if(in  != 0) fftw_free(in);
-    if(out != 0) fftw_free(out);
+    if(in  != nullptr) fftw_free(in);
+    if(out != nullptr) fftw_free(out);
 
     in  = (double*) fftw_malloc(sizeof(double) * nSampleX*nSampleY);
     out = (double*) fftw_malloc(sizeof(double) * nSampleX*nSampleY);

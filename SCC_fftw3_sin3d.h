@@ -194,7 +194,7 @@ fftw3_sin3d(long nx, long ny, long nz, double LX = 1.0, double LY = 1.0, double 
 virtual ~fftw3_sin3d()
 {
     if(plan != 0) 
-    {fftw_destroy_plan(plan); fftw_cleanup();}
+    {fftw_destroy_plan(plan); /*fftw_cleanup();*/}
 
     if(in  != 0) fftw_free(in);
     if(out != 0) fftw_free(out);
@@ -208,7 +208,7 @@ virtual ~fftw3_sin3d()
 void initialize()
 {
     if(plan != 0) 
-    {fftw_destroy_plan(plan); fftw_cleanup();}
+    {fftw_destroy_plan(plan); /*fftw_cleanup();*/}
     
     if(in   != 0) fftw_free(in);
     if(out  != 0) fftw_free(out);
@@ -242,7 +242,7 @@ void initialize(long nx, long ny, long nz, double LX = 1.0, double LY = 1.0, dou
     nSampleY   = ny-1;
     nSampleZ   = nz-1;
 
-    {fftw_destroy_plan(plan); fftw_cleanup();}
+    {fftw_destroy_plan(plan); /*fftw_cleanup();*/}
 
     if(in  != 0) fftw_free(in);
     if(out != 0) fftw_free(out);
