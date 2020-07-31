@@ -152,7 +152,7 @@ fftw3_cos1d(long nx,double LX = 1.0)
 virtual ~fftw3_cos1d()
 {
     if(plan != 0) 
-    {fftw_destroy_plan(plan); fftw_cleanup();}
+    {fftw_destroy_plan(plan);/*fftw_cleanup();*/}
     
     if(in  != 0)  fftw_free(in);
     if(out != 0)  fftw_free(out);
@@ -165,7 +165,7 @@ virtual ~fftw3_cos1d()
 void initialize()
 {
     if(plan != 0) 
-    {fftw_destroy_plan(plan); fftw_cleanup();}
+    {fftw_destroy_plan(plan); /*fftw_cleanup();*/}
     
     if(in   != 0) fftw_free(in);
     if(out  != 0) fftw_free(out);
@@ -186,7 +186,7 @@ void initialize(long nx,double LX = 1.0)
     this->nx       = nx;
     this->nSamples = nx+1;
     if(plan != 0) 
-    {fftw_destroy_plan(plan); fftw_cleanup();}
+    {fftw_destroy_plan(plan); /*fftw_cleanup();*/}
 
     if(in  != 0) fftw_free(in); 
     if(out != 0) fftw_free(out);

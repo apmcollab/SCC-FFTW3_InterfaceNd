@@ -219,7 +219,7 @@ virtual ~fftw3_3d()
     if(inverseplan != 0) 
     {fftw_destroy_plan(inverseplan); cleanupFlag = true;}
     
-    if(cleanupFlag) {fftw_cleanup();}
+    if(cleanupFlag) {/*fftw_cleanup();*/}
     
     if(in  != 0) fftw_free(in); 
     if(out != 0) fftw_free(out);
@@ -239,7 +239,7 @@ void initialize()
     if(inverseplan != 0) 
     {fftw_destroy_plan(inverseplan);  cleanupFlag = true;}
     
-    if(cleanupFlag) {fftw_cleanup();}
+    if(cleanupFlag) {/*fftw_cleanup();*/}
     
     if(in  != 0) fftw_free(in); 
     if(out != 0) fftw_free(out);
@@ -277,7 +277,7 @@ void initialize(long nx, long ny, long nz, double LX = 1.0, double LY = 1.0, dou
     if(inverseplan != 0) 
     {fftw_destroy_plan(inverseplan); cleanupFlag = true;}
     
-    if(cleanupFlag) {fftw_cleanup();}
+    if(cleanupFlag) {/*fftw_cleanup();*/}
 
     if(in  != 0) fftw_free(in); 
     if(out != 0) fftw_free(out);
