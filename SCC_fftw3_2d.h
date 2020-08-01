@@ -1,4 +1,5 @@
 #include "fftw3.h"
+
 #include "../DoubleVectorNd/SCC_DoubleVector2d.h"
 #include "../GridFunctionNd/SCC_GridFunction2d.h"
 
@@ -147,10 +148,6 @@ fftw3_2d()
 
     LX = 1.0;
     LY = 1.0;
-
-#ifdef _FFTW_OPENMP
-     fftw_init_threads();
-#endif
 }
 
 fftw3_2d(const fftw3_2d& DFT)
@@ -165,9 +162,6 @@ fftw3_2d(const fftw3_2d& DFT)
         return;
     }
 
-#ifdef _FFTW_OPENMP
-     fftw_init_threads();
-#endif
      initialize(DFT.nx,DFT.ny,DFT.LX,DFT.LY);
 }
 
@@ -183,53 +177,28 @@ fftw3_2d(long nx, long ny, double LX = 1.0, double LY = 1.0)
     forwardplan = 0;
     inverseplan = 0;
 
-#ifdef _FFTW_OPENMP
-     fftw_init_threads();
-#endif
-
     initialize(nx,ny);
 }
 
 virtual ~fftw3_2d()
 {
-    bool cleanupFlag = false;
-    
     if(forwardplan != 0) 
-    { fftw_destroy_plan(forwardplan); cleanupFlag = true;}
+    { fftw_destroy_plan(forwardplan);}
     
     if(inverseplan != 0) 
-    {fftw_destroy_plan(inverseplan);  cleanupFlag = true;}
-    
-    if(cleanupFlag) {/*fftw_cleanup();*/}
+    {fftw_destroy_plan(inverseplan);}
     
     if(in  != 0) fftw_free(in); 
     if(out != 0) fftw_free(out);
-
-    #ifdef _FFTW_OPENMP
-    fftw_cleanup_threads();
-    #endif
 }
-
-#ifdef _FFTW_OPENMP
-void initialize(long nx, long ny, int nthreads, double LX = 1.0, double LY = 1.0)
-{
-    fftw_plan_with_nthreads(nthreads);
-    initialize(nx,ny,LX,LY);
-}
-#endif
 
 void initialize()
 {
-    bool cleanupFlag = false;
-    
     if(forwardplan != 0) 
-    { fftw_destroy_plan(forwardplan); cleanupFlag = true;}
+    { fftw_destroy_plan(forwardplan);}
     
     if(inverseplan != 0) 
-    {fftw_destroy_plan(inverseplan);  cleanupFlag = true;}
-    
-    if(cleanupFlag) {/*fftw_cleanup();*/}
-    
+    {fftw_destroy_plan(inverseplan);}
     
     if(in  != 0) fftw_free(in); 
     if(out != 0) fftw_free(out);
@@ -249,20 +218,16 @@ void initialize()
 
 void initialize(long nx, long ny, double LX = 1.0, double LY = 1.0)
 {
-    bool cleanupFlag;
     if((this->nx != nx)||(this->ny != ny))
     {
     this-> nx = nx;
     this-> ny = ny;
-    cleanupFlag = false;
     
     if(forwardplan != 0) 
-    { fftw_destroy_plan(forwardplan); cleanupFlag = true;}
+    { fftw_destroy_plan(forwardplan);;}
     
     if(inverseplan != 0) 
-    {fftw_destroy_plan(inverseplan);  cleanupFlag = true;}
-    
-    if(cleanupFlag) {/*fftw_cleanup();*/}
+    {fftw_destroy_plan(inverseplan);}
     
 
     if(in  != 0) fftw_free(in); 
@@ -497,8 +462,6 @@ private:
 
     fftw_complex*  in;
     fftw_complex* out;
-
-
 };
 }
 #endif

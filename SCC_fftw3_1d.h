@@ -165,15 +165,12 @@ fftw3_1d(const fftw3_1d& DFT)
 
 virtual ~fftw3_1d()
 {
-    bool cleanupFlag = false;
-    
     if(forwardplan != 0) 
-    { fftw_destroy_plan(forwardplan); cleanupFlag = true;}
+    { fftw_destroy_plan(forwardplan);}
     
     if(inverseplan != 0) 
-    {fftw_destroy_plan(inverseplan);  cleanupFlag = true;}
-    
-    if(cleanupFlag) {/*fftw_cleanup();*/}
+    {fftw_destroy_plan(inverseplan);}
+
     
     if(in  != 0) fftw_free(in); 
     if(out != 0) fftw_free(out);
@@ -181,15 +178,12 @@ virtual ~fftw3_1d()
 
 void initialize()
 {
-    bool cleanupFlag = false;
-    
     if(forwardplan != 0) 
-    { fftw_destroy_plan(forwardplan); cleanupFlag = true;}
+    { fftw_destroy_plan(forwardplan);}
     
     if(inverseplan != 0) 
-    {fftw_destroy_plan(inverseplan);  cleanupFlag = true;}
- 
-    if(cleanupFlag) {/*fftw_cleanup();*/}
+    {fftw_destroy_plan(inverseplan);}
+
     
     if(in != 0)  fftw_free(in); 
     if(out != 0) fftw_free(out);
@@ -205,21 +199,16 @@ void initialize()
 
 void initialize(long nx, double LX = 1.0)
 {
-    bool cleanupFlag;
     if((this->nx != nx))
     {
     this->nx = nx;
     
-    cleanupFlag = false;
-    
     if(forwardplan != 0) 
-    { fftw_destroy_plan(forwardplan); cleanupFlag = true;}
+    { fftw_destroy_plan(forwardplan);}
     
     if(inverseplan != 0) 
-    {fftw_destroy_plan(inverseplan);  cleanupFlag = true;}
+    {fftw_destroy_plan(inverseplan);}
 
-    if(cleanupFlag) {/*fftw_cleanup();*/}
-        
     if(in != 0)  fftw_free(in); 
     if(out != 0) fftw_free(out);
 

@@ -135,7 +135,7 @@ fftw3_sin1d(long nx, double LX = 1.0)
 void initialize()
 {
     if(plan != 0) 
-    {fftw_destroy_plan(plan); /*fftw_cleanup();*/}
+    {fftw_destroy_plan(plan);}
     
     if(in   != 0)  fftw_free(in);
     if(out  != 0) fftw_free(out);
@@ -157,7 +157,7 @@ void initialize(long nx, double LX = 1.0)
     this->nSamples = nx-1;
     
     if(plan != 0) 
-    {fftw_destroy_plan(plan); /*fftw_cleanup();*/}
+    {fftw_destroy_plan(plan);}
 
     if(in  != 0) fftw_free(in); 
     if(out != 0) fftw_free(out);

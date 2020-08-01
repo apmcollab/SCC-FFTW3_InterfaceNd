@@ -5,10 +5,6 @@
 
 #include <exception>
 
-#ifdef _FFTW_OPENMP
-#include <omp.h>
-#endif
-
 
 #ifndef SCC_FFTW3_SIN_3D_
 #define SCC_FFTW3_SIN_3D_
@@ -159,10 +155,6 @@ fftw3_sin3d()
     nSampleX = 0;
     nSampleY = 0;
     nSampleZ = 0;
-
-    #ifdef _FFTW_OPENMP
-     fftw_init_threads();
-    #endif
 }
 
 fftw3_sin3d(long nx, long ny, long nz, double LX = 1.0, double LY = 1.0, double LZ = 1.0)
@@ -183,11 +175,6 @@ fftw3_sin3d(long nx, long ny, long nz, double LX = 1.0, double LY = 1.0, double 
     out         = 0;
     plan        = 0;
 
-    #ifdef _FFTW_OPENMP
-     fftw_init_threads();
-    #endif
-
-
     initialize(nx,ny,nz);
 }
 
@@ -198,17 +185,12 @@ virtual ~fftw3_sin3d()
 
     if(in  != 0) fftw_free(in);
     if(out != 0) fftw_free(out);
-
-
-    #ifdef _FFTW_OPENMP
-    fftw_cleanup_threads();
-    #endif
 }
 
 void initialize()
 {
     if(plan != 0) 
-    {fftw_destroy_plan(plan); /*fftw_cleanup();*/}
+    {fftw_destroy_plan(plan);}
     
     if(in   != 0) fftw_free(in);
     if(out  != 0) fftw_free(out);
@@ -242,7 +224,7 @@ void initialize(long nx, long ny, long nz, double LX = 1.0, double LY = 1.0, dou
     nSampleY   = ny-1;
     nSampleZ   = nz-1;
 
-    {fftw_destroy_plan(plan); /*fftw_cleanup();*/}
+    {fftw_destroy_plan(plan);}
 
     if(in  != 0) fftw_free(in);
     if(out != 0) fftw_free(out);
@@ -266,15 +248,6 @@ void initialize(long nx, long ny, long nz, double LX = 1.0, double LY = 1.0, dou
     this->LY = LY;
     this->LZ = LZ;
 }
-
-#ifdef _FFTW_OPENMP
-void initialize(long nx, long ny, long nz, int nthreads, double LX = 1.0, double LY = 1.0, double LZ = 1.0)
-{
-    fftw_plan_with_nthreads(nthreads);
-    initialize(nx,ny,nz);
-}
-#endif
-
 
 // fftw3d_sin_forward argument sizes:
 //
@@ -535,36 +508,3 @@ private:
 };
 }
 #endif
-
-/*
-
-int fftw_init_threads(void);
-
-This function, which need only be called once, performs any one-time initialization required
-to use threads on your system. It returns zero if there was some error (which should not happen under normal circumstances)
-and a non-zero value otherwise.
-
-Third, before creating a plan that you want to parallelize, you should call:
-void fftw_plan_with_nthreads(int nthreads);
-
-The nthreads argument indicates the number of threads you want
-FFTW to use (or actually, the maximum number). All plans subsequently created with any planner
-routine will use that many threads. You can call fftw_plan_with_nthreads, create some plans,
-call fftw_plan_with_nthreads again with a different argument, and create some more
-plans for a new number of threads. Plans already created before a call to fftw_plan_with_nthreads
-are unaffected. If you pass an nthreads argument of 1 (the default), threads are disabled for subsequent plans.
-
-With OpenMP, to configure FFTW to use all of the currently running OpenMP threads
-(set by omp_set_num_threads(nthreads) or by the OMP_NUM_THREADS environment variable), you can do:
-
-fftw_plan_with_nthreads(omp_get_max_threads()). (The ‘omp_’ OpenMP functions are declared via #include <omp.h>.)
-
-Given a plan, you then execute it as usual with fftw_execute(plan), and the execution will
-use the number of threads specified when the plan was created. When done, you destroy it as usual with fftw_destroy_plan. As described in Thread safety, plan execution is thread-safe, but plan creation and destruction are not: you should create/destroy plans only from a single thread, but can safely execute multiple plans in parallel.
-
-There is one additional routine: if you want to get rid of all memory and other resources
-allocated internally by FFTW, you can call:
-
-void fftw_cleanup_threads(void);
-
- */
