@@ -208,8 +208,6 @@ virtual ~fftw3_3d()
 
 void initialize()
 {
-    bool cleanupFlag = false;
-    
     if(forwardplan != 0) 
     { fftw_destroy_plan(forwardplan);}
     
@@ -236,9 +234,6 @@ void initialize()
 
 void initialize(long nx, long ny, long nz, double LX = 1.0, double LY = 1.0, double LZ = 1.0)
 {
-
-    bool cleanupFlag;
-    
     if((this->nx != nx)||(this->ny != ny)||(this->nz != nz))
     {
     this->nx = nx;
