@@ -224,6 +224,7 @@ void initialize(long nx, long ny, long nz, double LX = 1.0, double LY = 1.0, dou
     nSampleY   = ny-1;
     nSampleZ   = nz-1;
 
+    if(plan != 0)
     {fftw_destroy_plan(plan);}
 
     if(in  != 0) fftw_free(in);
