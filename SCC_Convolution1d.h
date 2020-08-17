@@ -74,8 +74,6 @@ class Convolution1d
 
     Gwrap.initialize();
 
-    DFT.initialize();
-
     dataReal.initialize();
     dataImag.initialize();
 
@@ -121,6 +119,12 @@ class Convolution1d
     void initialize(SCC::GridFunction1d& F, SCC::GridFunction1d& G)
     {
     	allocateData(F,G);
+    }
+
+
+    void destroyFFTWplans()
+    {
+    DFT.initialize();
     }
 
     // Returns true if the input arguments have data structure parameters

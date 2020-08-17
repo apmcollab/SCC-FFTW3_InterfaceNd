@@ -79,8 +79,6 @@ class Convolution2d
 
     Gwrap.initialize();
 
-    DFT.initialize();
-
     dataReal.initialize();
     dataImag.initialize();
 
@@ -131,6 +129,11 @@ class Convolution2d
     void initialize(SCC::GridFunction2d& F, SCC::GridFunction2d& G)
     {
     	allocateData(F,G);
+    }
+
+    void destroyFFTWplans()
+    {
+    DFT.initialize();
     }
 
 
