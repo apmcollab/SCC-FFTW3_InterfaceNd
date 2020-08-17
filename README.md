@@ -13,9 +13,9 @@ The MKL version of the FFTW3 library does not implement the real-to-real (r2r) t
 ### Prerequisites
 C++11, FFTW3 installed, SCC::DoubleVectorNd, SCC::GridFunctionNd
 ### Versioning
-Release : 1.0.4
+Release : 1.0.5
 ### Date
-August 3, 2020
+August 17, 2020
 ### Authors
 Chris Anderson
 ### License
