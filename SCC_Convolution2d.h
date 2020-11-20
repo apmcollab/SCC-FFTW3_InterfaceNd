@@ -178,7 +178,7 @@ class Convolution2d
     {
     throw std::runtime_error("Convolution1d Error:\nConvolution kernel must be defined on an even number of panels.\n");
     }
-    if((std::abs(hx - G.getHx()) > 1.0e-12)||(std::abs(hy - G.getHy())))
+    if((std::abs(hx - G.getHx()) > 1.0e-12)||(std::abs(hy - G.getHy()) > 1.0e-12 ))
     {
     throw std::runtime_error("Convolution2d Error:\nMesh widths (hx,hy) of arguments not equal.\n");
     }
