@@ -98,9 +98,9 @@ public:
 
 fftw3_sin1d()
 {
-    plan     = 0;
-    in       = 0;
-    out      = 0;
+    plan     = nullptr;
+    in       = nullptr;
+    out      = nullptr;
     nx       = 0;
     LX       = 1.0;
     nSamples = 0;
@@ -108,42 +108,39 @@ fftw3_sin1d()
 
 fftw3_sin1d(long nx, double LX = 1.0)
 {
-    this->nx    = nx;
-    this->LX    = LX;
-    this->nSamples = nx-1;
+    this->nx    = 0;
+    in          = nullptr;
+    out         = nullptr;
+    plan        = nullptr;
 
-    in          = 0;
-    out         = 0;
-    plan        = 0;
-
-    initialize(nx);
+    initialize(nx,LX);
 }
 
 ~fftw3_sin1d()
 {
-    if(plan != 0) 
+    if(plan != nullptr)
     {fftw_destroy_plan(plan); /*fftw_cleanup();*/}
     
-    if(in  != 0)  fftw_free(in);
-    if(out != 0)  fftw_free(out);
+    if(in  != nullptr)  fftw_free(in);
+    if(out != nullptr)  fftw_free(out);
 
-    plan = 0;
-    in   = 0;
-    out  = 0;
+    plan = nullptr;
+    in   = nullptr;
+    out  = nullptr;
 }
 
 void initialize()
 {
-    if(plan != 0) 
+    if(plan != nullptr)
     {fftw_destroy_plan(plan);}
     
-    if(in   != 0)  fftw_free(in);
-    if(out  != 0) fftw_free(out);
+    if(in   != nullptr)  fftw_free(in);
+    if(out  != nullptr) fftw_free(out);
 
-    plan     = 0;
+    plan     = nullptr;
+    in       = nullptr;
+    out      = nullptr;
 
-    in       = 0;
-    out      = 0;
     nx       = 0;
     LX       = 1.0;
     nSamples = 0;

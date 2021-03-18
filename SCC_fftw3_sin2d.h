@@ -133,8 +133,8 @@ public:
 fftw3_sin2d()
 {
     plan = nullptr;
-    in  = nullptr;
-    out = nullptr;
+    in   = nullptr;
+    out  = nullptr;
 
     nx  = 0;
     ny  = 0;
@@ -151,14 +151,8 @@ fftw3_sin2d()
 
 fftw3_sin2d(long nx, long ny,double LX = 1.0, double LY = 1.0)
 {
-    this->nx    = nx;
-    this->ny    = ny;
-
-    this->LX    = LX;
-    this->LY    = LY;
-
-    nSampleX   = nx-1;
-    nSampleY   = ny-1;
+    this->nx    = 0;
+    this->ny    = 0;
 
     in          = nullptr;
     out         = nullptr;

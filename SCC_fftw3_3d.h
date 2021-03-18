@@ -145,11 +145,11 @@ public:
 
 fftw3_3d()
 {
-    forwardplan = 0;
-    inverseplan = 0;
+    forwardplan = nullptr;
+    inverseplan = nullptr;
 
-    in  = 0;
-    out = 0;
+    in  = nullptr;
+    out = nullptr;
 
     nx  = 0;
     ny  = 0;
@@ -162,12 +162,12 @@ fftw3_3d()
 
 fftw3_3d(const fftw3_3d& DFT)
 {
-    if(DFT.forwardplan == 0)
+    if(DFT.forwardplan == nullptr)
     {
-        in  = 0;
-        out = 0;
-        forwardplan = 0;
-        inverseplan = 0;
+        in  = nullptr;
+        out = nullptr;
+        forwardplan = nullptr;
+        inverseplan = nullptr;
         initialize();
         return;
     }
@@ -177,51 +177,47 @@ fftw3_3d(const fftw3_3d& DFT)
 
 fftw3_3d(long nx, long ny, long nz, double LX = 1.0, double LY = 1.0, double LZ = 1.0)
 {
-    this->nx    = nx;
-    this->ny    = ny;
-    this->nz    = nz;
+    this->nx    = 0;
+    this->ny    = 0;
+    this->nz    = 0;
 
-    this->LX = LX;
-    this->LY = LY;
-    this->LZ = LZ;
-
-    in          = 0;
-    out         = 0;
-    forwardplan = 0;
-    inverseplan = 0;
+    in          = nullptr;
+    out         = nullptr;
+    forwardplan = nullptr;
+    inverseplan = nullptr;
 
     initialize(nx,ny,nz,LZ,LY,LZ);
 }
 
 virtual ~fftw3_3d()
 {
-    if(forwardplan != 0) 
+    if(forwardplan != nullptr)
     { fftw_destroy_plan(forwardplan);}
     
-    if(inverseplan != 0) 
+    if(inverseplan != nullptr)
     {fftw_destroy_plan(inverseplan);}
 
     
-    if(in  != 0) fftw_free(in); 
-    if(out != 0) fftw_free(out);
+    if(in  != nullptr) fftw_free(in);
+    if(out != nullptr) fftw_free(out);
 }
 
 void initialize()
 {
-    if(forwardplan != 0) 
+    if(forwardplan != nullptr)
     { fftw_destroy_plan(forwardplan);}
     
-    if(inverseplan != 0) 
+    if(inverseplan != nullptr)
     {fftw_destroy_plan(inverseplan);}
     
-    if(in  != 0) fftw_free(in); 
-    if(out != 0) fftw_free(out);
+    if(in  != nullptr) fftw_free(in);
+    if(out != nullptr) fftw_free(out);
 
-    forwardplan = 0;
-    inverseplan = 0;
+    forwardplan = nullptr;
+    inverseplan = nullptr;
 
-    in  = 0;
-    out = 0;
+    in  = nullptr;
+    out = nullptr;
 
     nx  = 0;
     ny  = 0;   
@@ -240,14 +236,14 @@ void initialize(long nx, long ny, long nz, double LX = 1.0, double LY = 1.0, dou
     this->ny = ny;
     this->nz = nz;
 
-    if(forwardplan != 0) 
+    if(forwardplan != nullptr)
     { fftw_destroy_plan(forwardplan);}
     
-    if(inverseplan != 0) 
+    if(inverseplan != nullptr)
     {fftw_destroy_plan(inverseplan);}
 
-    if(in  != 0) fftw_free(in); 
-    if(out != 0) fftw_free(out);
+    if(in  != nullptr) fftw_free(in);
+    if(out != nullptr) fftw_free(out);
     
     in  = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * nx*ny*nz);
     out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * nx*ny*nz);

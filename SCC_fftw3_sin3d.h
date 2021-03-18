@@ -140,9 +140,9 @@ public:
 
 fftw3_sin3d()
 {
-    plan = 0;
-    in   = 0;
-    out  = 0;
+    plan = nullptr;
+    in   = nullptr;
+    out  = nullptr;
 
     nx  = 0;
     ny  = 0;
@@ -159,46 +159,37 @@ fftw3_sin3d()
 
 fftw3_sin3d(long nx, long ny, long nz, double LX = 1.0, double LY = 1.0, double LZ = 1.0)
 {
-    this->nx    = nx;
-    this->ny    = ny;
-    this->nz    = nz;
+    this->nx    = 0;
+    this->ny    = 0;
+    this->nz    = 0;
 
-    this->LX = LX;
-    this->LY = LY;
-    this->LZ = LZ;
+    in          = nullptr;
+    out         = nullptr;
+    plan        = nullptr;
 
-    nSampleX   = nx-1;
-    nSampleY   = ny-1;
-    nSampleZ   = nz-1;
-
-    in          = 0;
-    out         = 0;
-    plan        = 0;
-
-    initialize(nx,ny,nz);
+    initialize(nx,ny,nz,LX,LY,LZ);
 }
 
 virtual ~fftw3_sin3d()
 {
-    if(plan != 0) 
+    if(plan != nullptr)
     {fftw_destroy_plan(plan); /*fftw_cleanup();*/}
 
-    if(in  != 0) fftw_free(in);
-    if(out != 0) fftw_free(out);
+    if(in  != nullptr) fftw_free(in);
+    if(out != nullptr) fftw_free(out);
 }
 
 void initialize()
 {
-    if(plan != 0) 
+    if(plan != nullptr)
     {fftw_destroy_plan(plan);}
     
-    if(in   != 0) fftw_free(in);
-    if(out  != 0) fftw_free(out);
+    if(in   != nullptr) fftw_free(in);
+    if(out  != nullptr) fftw_free(out);
 
-     plan = 0;
-
-    in  = 0;
-    out = 0;
+    plan = nullptr;
+    in   = nullptr;
+    out  = nullptr;
 
     nx  = 0;
     ny  = 0;
