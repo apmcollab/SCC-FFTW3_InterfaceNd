@@ -130,7 +130,7 @@ public:
 	primeIndex = 0;
 	for(int i = 0; i < 30; i++)
 	{
-	if(factor == primeList[i]) primeIndex = i+1;
+	if(factor < primeList[i]) primeIndex = i+1;
 	}
 
 	if(primeIndex == 0)
