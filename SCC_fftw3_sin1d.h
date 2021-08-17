@@ -177,6 +177,27 @@ void initialize(long nx, double LX = 1.0)
 }
 
 
+// replan() is used to create new plans for multi-threaded instances when
+// the number of threads allocated to FFTW3 is changed.
+
+void replan()
+{
+   if(plan != nullptr) {fftw_destroy_plan(plan);}
+
+   if((in  == nullptr) || (out == nullptr))
+   {
+   throw std::runtime_error("\nXXX Error : calling replan() before SCC::fft3_sin1d instance initialized.\n ");
+   }
+
+   plan = fftw_plan_r2r_1d(nSamples, in, out, FFTW_RODFT00, FFTW_ESTIMATE);
+
+   if(plan == nullptr)
+   {
+   throw std::runtime_error("\nXXX Error : required fftw_r2r_1d function not available \nXXX in FFTW library used (likely MKL) ");
+   }
+}
+
+
 // fftw1d_sin_forward argument sizes:
 //
 // This operator ignores the perimeter values of the input vector.

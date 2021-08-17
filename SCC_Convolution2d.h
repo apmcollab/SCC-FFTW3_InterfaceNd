@@ -136,6 +136,14 @@ class Convolution2d
     DFT.initialize();
     }
 
+// replan() is used to create new plans for multi-threaded instances when
+// the number of threads allocated to FFTW3 is changed.
+
+    void replan()
+    {
+    DFT.replan();
+    }
+
 
     // Returns true if the input arguments have data structure parameters
     // identical to the cached version (so no need to reallocate data).
