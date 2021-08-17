@@ -81,9 +81,7 @@ public:
 	}
 //
 //  This routine determines if n possess a prime factor that's larger than
-//  the specified primeIndex'th prime (with 2 corresponding to primeIndex 1).
-//  For example primeIndex = 4 returns true if the input value has a prime
-//  factorization that contains a prime factor that's not 2,3,5, or 7.
+//  the specified primeIndex'th prime (with 2 corresponding to primeIndex 0).
 //
 //  For the FFTW-2, use primeIndex = 4 to get values
 //  of n for which the routine is consistently efficient.
@@ -113,7 +111,7 @@ public:
     // Factor out all primes less than primeList[primeIndex]
 
     long primeCount;
-    for(primeCount = 0; primeCount < primeIndex; primeCount++)
+    for(primeCount = 0; primeCount <= primeIndex; primeCount++)
     {
     while(n%primeList[primeCount] == 0){n = n/primeList[primeCount];};
     }
@@ -130,7 +128,7 @@ public:
 	primeIndex = 0;
 	for(int i = 0; i < 30; i++)
 	{
-	if(factor < primeList[i]) primeIndex = i+1;
+	if(factor  >= primeList[i]) primeIndex = i;
 	}
 
 	if(primeIndex == 0)
