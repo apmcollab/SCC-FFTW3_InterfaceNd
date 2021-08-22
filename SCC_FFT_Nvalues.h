@@ -131,7 +131,7 @@ public:
 	if(factor  >= primeList[i]) primeIndex = i;
 	}
 
-	if(primeIndex == 0)
+	if(primeIndex >= 30)
 	{
     printf("XXXXXXXXXXX setMaximalPrimeFactor Error XXXXXXXXXXX\n");
 	printf("Requsting maximal prime factor greater than 127 \n");
