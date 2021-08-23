@@ -191,7 +191,7 @@ class Convolution2d
     throw std::runtime_error("Convolution2d Error:\nMesh widths (hx,hy) of arguments not equal.\n");
     }
 
-    fftNvalues.setMaximalPrimeFactor(5);
+    fftNvalues.setMaximalPrimeFactor(7);
     
     panelCountX = xPanelsF + xPanelsG/2 + 1;
     panelCountY = yPanelsF + yPanelsG/2 + 1;
