@@ -66,9 +66,11 @@ public:
 
 	long getFFT_N(long nOriginal)
 	{
+	if(nOriginal == 1) return nOriginal;
 
 	bool  checkPrime = checkLargePrimeFactors(nOriginal);
     long           n = nOriginal;
+
     if(checkPrime)
     {
     	while(checkPrime)
