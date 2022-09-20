@@ -154,7 +154,7 @@ class Convolution2d
 
     sizeDiff += std::abs(xPanelsF - F.getXpanelCount());
     sizeDiff += std::abs(yPanelsF - F.getYpanelCount());
-    sizeDiff  = std::abs(xPanelsG - G.getXpanelCount());
+    sizeDiff += std::abs(xPanelsG - G.getXpanelCount());
     sizeDiff += std::abs(yPanelsG - G.getYpanelCount());
 
     if(std::abs(hx - F.getHx()) > 1.0e-12) sizeDiff += 1;
