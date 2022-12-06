@@ -215,13 +215,14 @@ void initialize()
 
 void initialize(long nx, long ny, double LX = 1.0, double LY = 1.0)
 {
+
     if((this->nx != nx)||(this->ny != ny))
     {
     this-> nx = nx;
     this-> ny = ny;
     
     if(forwardplan != nullptr)
-    { fftw_destroy_plan(forwardplan);;}
+    { fftw_destroy_plan(forwardplan);}
     
     if(inverseplan != nullptr)
     {fftw_destroy_plan(inverseplan);}
@@ -230,13 +231,15 @@ void initialize(long nx, long ny, double LX = 1.0, double LY = 1.0)
     if(in  != nullptr) fftw_free(in);
     if(out != nullptr) fftw_free(out);
     
+    if((nx != 0)&&(ny!=0))
+    {
     in  = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * nx*ny);
     out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * nx*ny);
     
 
     forwardplan = fftw_plan_dft_2d(nx, ny, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
     inverseplan = fftw_plan_dft_2d(nx, ny, in, out, FFTW_BACKWARD,FFTW_ESTIMATE);
-    
+    }
     //
     // Note: In the FFTW_BACKWARD plan the "out" argument is transformed 
     //       into the "in" argument when the plan is executed. 
