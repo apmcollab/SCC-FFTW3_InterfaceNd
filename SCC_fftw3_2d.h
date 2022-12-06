@@ -3,6 +3,10 @@
 #include "../DoubleVectorNd/SCC_DoubleVector2d.h"
 #include "../GridFunctionNd/SCC_GridFunction2d.h"
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 #ifndef SCC_FFTW3_2D_
 #define SCC_FFTW3_2D_
 //
@@ -179,7 +183,22 @@ fftw3_2d(long nx, long ny, double LX = 1.0, double LY = 1.0)
 
 virtual ~fftw3_2d()
 {
-    if(forwardplan != nullptr)
+
+#ifdef _OPENMP
+#pragma omp critical
+	{
+	if(forwardplan != nullptr)
+    { fftw_destroy_plan(forwardplan);}
+
+    if(inverseplan != nullptr)
+    {fftw_destroy_plan(inverseplan);}
+
+    if(in  != nullptr) fftw_free(in);
+    if(out != nullptr) fftw_free(out);
+	}
+#else
+	{
+	if(forwardplan != nullptr)
     { fftw_destroy_plan(forwardplan);}
     
     if(inverseplan != nullptr)
@@ -187,10 +206,31 @@ virtual ~fftw3_2d()
     
     if(in  != nullptr) fftw_free(in);
     if(out != nullptr) fftw_free(out);
+	}
+#endif
 }
 
 void initialize()
 {
+#ifdef _OPENMP
+#pragma omp critical
+{
+	    if(forwardplan != nullptr)
+	    { fftw_destroy_plan(forwardplan);}
+
+	    if(inverseplan != nullptr)
+	    {fftw_destroy_plan(inverseplan);}
+
+	    if(in  != nullptr) fftw_free(in);
+	    if(out != nullptr) fftw_free(out);
+
+	    forwardplan = nullptr;
+	    inverseplan = nullptr;
+
+	    in  = nullptr;
+	    out = nullptr;
+}
+#else
     if(forwardplan != nullptr)
     { fftw_destroy_plan(forwardplan);}
     
@@ -205,6 +245,7 @@ void initialize()
 
     in  = nullptr;
     out = nullptr;
+#endif
 
     nx  = 0;
     ny  = 0;
@@ -215,7 +256,9 @@ void initialize()
 
 void initialize(long nx, long ny, double LX = 1.0, double LY = 1.0)
 {
-
+#ifdef _OPENMP
+#pragma omp critical
+{
     if((this->nx != nx)||(this->ny != ny))
     {
     this-> nx = nx;
@@ -245,7 +288,38 @@ void initialize(long nx, long ny, double LX = 1.0, double LY = 1.0)
     //       into the "in" argument when the plan is executed. 
     //
     }
+}
+#else
+if((this->nx != nx)||(this->ny != ny))
+{
+    this-> nx = nx;
+    this-> ny = ny;
 
+    if(forwardplan != nullptr)
+    { fftw_destroy_plan(forwardplan);}
+
+    if(inverseplan != nullptr)
+    {fftw_destroy_plan(inverseplan);}
+
+
+    if(in  != nullptr) fftw_free(in);
+    if(out != nullptr) fftw_free(out);
+
+    if((nx != 0)&&(ny!=0))
+    {
+    in  = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * nx*ny);
+    out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * nx*ny);
+
+
+    forwardplan = fftw_plan_dft_2d(nx, ny, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
+    inverseplan = fftw_plan_dft_2d(nx, ny, in, out, FFTW_BACKWARD,FFTW_ESTIMATE);
+    }
+    //
+    // Note: In the FFTW_BACKWARD plan the "out" argument is transformed
+    //       into the "in" argument when the plan is executed.
+    //
+}
+#endif
     this->LX = LX;
     this->LY = LY;
 }
@@ -254,6 +328,9 @@ void initialize(long nx, long ny, double LX = 1.0, double LY = 1.0)
 // the number of threads allocated to FFTW3 is changed.
 
 void replan()
+{
+#ifdef _OPENMP
+#pragma omp critical
 {
    if(forwardplan != nullptr)
    { fftw_destroy_plan(forwardplan);}
@@ -268,6 +345,22 @@ void replan()
 
    forwardplan = fftw_plan_dft_2d(nx, ny, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
    inverseplan = fftw_plan_dft_2d(nx, ny, in, out, FFTW_BACKWARD,FFTW_ESTIMATE);
+}
+#else
+	if(forwardplan != nullptr)
+	{ fftw_destroy_plan(forwardplan);}
+
+	if(inverseplan != nullptr)
+	{fftw_destroy_plan(inverseplan);}
+
+	if((in  == nullptr) || (out == nullptr))
+	{
+		throw std::runtime_error("\nXXX Error : calling replan() before SCC::fft3_3d instance initialized.\n ");
+	}
+
+	forwardplan = fftw_plan_dft_2d(nx, ny, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
+	inverseplan = fftw_plan_dft_2d(nx, ny, in, out, FFTW_BACKWARD,FFTW_ESTIMATE);
+#endif
 }
 
 // fftw2d_forward argument sizes:
